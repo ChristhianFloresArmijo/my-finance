@@ -1,0 +1,27 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".*\\.e2e-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@account/(.*)$": "<rootDir>/src/modules/account/$1",
+    "^@common/(.*)$": "<rootDir>/src/modules/shared/$1",
+    "^@shared/(.*)$": "<rootDir>/src/modules/shared/$1",
+    "^@auth/(.*)$": "<rootDir>/src/modules/authentication/$1",
+    "^@authorization/(.*)$": "<rootDir>/src/modules/authorization/$1",
+    "^@config/(.*)$": "<rootDir>/src/config/$1",
+    "^@test/(.*)$": "<rootDir>/test/$1",
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/"
+  ]
+}

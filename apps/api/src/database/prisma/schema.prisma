@@ -1,0 +1,253 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+  DELETED
+}
+
+enum PermissionScope {
+  ALL  // Applies to all records (default)
+  OWN  // Restricted to the user's own records
+  TEAM // Restricted to the user's team/group records
+  ORG  // Restricted to the user's organization records
+}
+
+model User {
+  id String @id @default(uuid())
+
+  first_name String
+  last_name String
+  email String @unique
+  password String
+  last_login DateTime?
+
+  email_verified_at        DateTime?
+  password_reset_token     String?   @unique
+  password_reset_expires_at DateTime?
+
+  // 2FA
+  totp_secret     String?
+  totp_enabled    Boolean   @default(false)
+  totp_enabled_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status Status @default(ACTIVE)
+
+  // RELATIONS
+  refresh_tokens RefreshToken[]  // One user can have multiple refresh tokens (multiple devices/sessions)
+  user_roles UserRole[] @relation("UserRoles") // New RBAC relation
+  assigned_roles UserRole[] @relation("AssignedRoles") // Roles assigned by this user
+  direct_permissions UserPermission[] @relation("UserDirectPermissions")
+  assigned_direct_permissions UserPermission[] @relation("AssignedDirectPermissions")
+  recovery_codes UserRecoveryCode[]
+  profile     UserProfile?
+  preferences UserPreferences?
+
+  @@map("users")
+}
+
+model UserProfile {
+  id             String    @id @default(uuid())
+  user_id        String    @unique
+  avatar         String?
+  phone          String?
+  address_line_1 String?
+  address_line_2 String?
+  city           String?
+  state          String?
+  postal_code    String?
+  country        String?   // ISO 3166-1 alpha-2 e.g. "US"
+  status         Status    @default(ACTIVE)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime? @updatedAt
+  deleted_at     DateTime?
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model UserPreferences {
+  id            String    @id @default(uuid())
+  user_id       String    @unique
+  theme         String    @default("system") // "light" | "dark" | "system"
+  language      String    @default("en")
+  timezone      String    @default("UTC")
+  notify_email  Boolean   @default(true)
+  notify_push   Boolean   @default(false)
+  notify_sms    Boolean   @default(false)
+  status        Status    @default(ACTIVE)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
+  deleted_at    DateTime?
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model UserRecoveryCode {
+  id         String    @id @default(uuid())
+  user_id    String
+  code_hash  String
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_recovery_codes")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  token      String    @unique               // the actual JWT refresh token string
+  user       User      @relation(fields: [user_id], references: [id])
+  user_id    String
+  expires_at DateTime
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  @@map("refresh_tokens")
+}
+
+// ============================================================================
+// RBAC MODELS
+// ============================================================================
+
+model Role {
+  id String @id @default(uuid())
+  name String @unique // e.g., "admin", "client", "staff", "moderator"
+  display_name String // e.g., "Administrator", "Client User", "Staff Member"
+  description String?
+  is_system Boolean @default(false) // System roles cannot be deleted
+  
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime? 
+  status Status @default(ACTIVE)
+
+  // RELATIONS
+  user_roles UserRole[]
+  role_permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id String @id @default(uuid())
+  resource String // e.g., "user", "post", "system", "report"
+  action String // e.g., "create", "read", "update", "delete", "manage"
+  scope PermissionScope @default(ALL) // Scope of the permission — ALL | OWN | TEAM | ORG
+  description String?
+  is_system Boolean @default(false) // System permissions cannot be deleted
+
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status Status @default(ACTIVE)
+
+  // RELATIONS
+  role_permissions RolePermission[]
+  user_permissions UserPermission[]
+
+  // Composite unique constraint for resource + action + scope
+  @@unique([resource, action, scope])
+  @@map("permissions")
+}
+
+model UserRole {
+  id String @id @default(uuid())
+  user_id String
+  role_id String
+  assigned_by String? // Who assigned this role (User ID)
+  assigned_at DateTime @default(now())
+  expires_at DateTime? // Optional: time-limited roles
+  status Status @default(ACTIVE)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime? 
+
+  // RELATIONS
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  user User @relation("UserRoles", fields: [user_id], references: [id], onDelete: Cascade)
+  assigned_by_user User? @relation("AssignedRoles", fields: [assigned_by], references: [id], onDelete: SetNull)
+
+  // A user can only have one instance of a specific role
+  @@unique([user_id, role_id])
+  @@map("user_roles")
+}
+
+model UserPermission {
+  id            String    @id @default(uuid())
+  user_id       String
+  permission_id String
+  assigned_by   String?
+  assigned_at   DateTime  @default(now())
+  expires_at    DateTime?
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+  status      Status    @default(ACTIVE)
+
+  // RELATIONS
+  user                 User       @relation("UserDirectPermissions", fields: [user_id], references: [id], onDelete: Cascade)
+  permission           Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  assigned_by_user     User?      @relation("AssignedDirectPermissions", fields: [assigned_by], references: [id], onDelete: SetNull)
+
+  @@unique([user_id, permission_id])
+  @@map("user_permissions")
+}
+
+// ============================================================================
+// AUDIT
+// ============================================================================
+
+model ChangeLog {
+  id           String   @id @default(uuid())
+  action       String   // e.g., "create-role", "assign-role-to-user"
+  entity_type  String   // e.g., "Role", "Permission", "UserRole"
+  entity_id    String?  // Primary key of the affected record
+  performed_by String?  // User ID of the actor
+  payload      Json?    // Sanitized command data (no passwords)
+  created_at   DateTime @default(now())
+
+  @@map("change_logs")
+}
+
+model RolePermission {
+  id String @id @default(uuid())
+  role_id String
+  permission_id String
+  
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime? 
+  status Status @default(ACTIVE)
+
+  // RELATIONS
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  // A role can only have one instance of a specific permission
+  @@unique([role_id, permission_id])
+  @@map("role_permissions")
+}

@@ -1,0 +1,34 @@
+GET http://localhost:3000/api
+
+### SEND RETRIVE USER REQUEST
+GET http://localhost:3000/api/users/6cdfd18c-4eac-4d25-91e7-0af22814b6f2
+
+### SEND FETCH USERS REQUEST
+GET http://localhost:3000/api/users/?status=ACTIVE&take=1&skip=0
+
+### SEND REDIRECT REQUEST
+GET http://localhost:3000/api/account/users
+
+### CREATES NEW USER
+POST  http://localhost:3000/api/users/
+Content-Type: application/json
+
+{
+  "first_name": "Christhian",
+  "last_name": "Flores",
+  "username": "chris02d3",
+  "email": "admin@admin.com",
+  "password": "Pepito01@",
+  "repassword": "Pepito01@",
+  "role": "ADMIN",
+  "status": "ACTIVE"
+}
+
+### UPDATE USER
+PATCH   http://localhost:3000/api/users/b2b6c686-ffd3-4521-8943-cd1472a56d58
+Content-Type: application/json
+
+{
+  "firstName": "Miaranda",
+  "password": "Pepito01@"
+}
