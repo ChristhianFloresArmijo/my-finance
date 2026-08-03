@@ -1,33 +1,9 @@
-# Infrastructure only — run `pnpm dev` separately for app processes
+# Root orchestrator — delegates to each app's own docker-compose.yml
 # Usage: docker compose up -d
+#
+# Each app's compose file is resolved with its own directory as the base path,
+# so volumes, build contexts, and .env files all resolve correctly.
 
-services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-finance_db}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  adminer:
-    image: adminer
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-
-  mailhog:
-    image: mailhog/mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # Web UI
-
-volumes:
-  postgres_data:
+include:
+  - apps/api/docker-compose.yml
+  - apps/web/docker-compose.yml
