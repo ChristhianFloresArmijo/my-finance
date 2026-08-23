@@ -1,4 +1,13 @@
-import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MinLength } from "class-validator"
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MinLength,
+} from "class-validator"
 import { ApiProperty } from "@nestjs/swagger"
 
 export class SignUpDto {
@@ -15,7 +24,8 @@ export class SignUpDto {
   password: string
   @ApiProperty() @IsNotEmpty() @IsString() repassword: string
   @ApiProperty({
-    description: "Role IDs to assign on registration. Falls back to DEFAULT_SIGNUP_ROLE env var if omitted.",
+    description:
+      "Role IDs to assign on registration. Falls back to DEFAULT_SIGNUP_ROLE env var if omitted.",
     type: [String],
     required: false,
   })

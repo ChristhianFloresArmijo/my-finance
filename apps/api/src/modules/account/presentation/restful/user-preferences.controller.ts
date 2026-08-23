@@ -1,20 +1,6 @@
-import {
-  Body,
-  Controller,
-  Put,
-  Param,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from "@nestjs/common"
+import { Body, Controller, Put, Param, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
 import { CommandBus } from "@nestjs/cqrs"
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from "@nestjs/swagger"
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "@auth/capabilities/guards"
 import { IsOwnerGuard } from "@authorization/capabilities/guards"
 import { CurrentUserPreferencesDto } from "@auth/presentation/dtos"

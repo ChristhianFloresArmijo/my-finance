@@ -94,7 +94,7 @@ export class PermissionController {
   @ApiResponse({ status: 400, description: "Invalid input data" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @UsePipes(new ValidationPipe())
   @Post()
   async create(@Body() createPermissionDto: CreatePermissionDto): Promise<Permission> {
@@ -119,7 +119,7 @@ export class PermissionController {
   @ApiResponse({ status: 403, description: "Cannot modify system permission" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @UsePipes(new ValidationPipe())
   @Put(":id")
   async update(
@@ -145,7 +145,7 @@ export class PermissionController {
   @ApiResponse({ status: 403, description: "Cannot delete system permission or permission in use" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @Delete(":id")
   async delete(@Param("id") id: string): Promise<{ message: string }> {
     const result = await this.commandBus.execute<

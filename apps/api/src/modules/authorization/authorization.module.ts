@@ -1,6 +1,10 @@
 import { Module, forwardRef } from "@nestjs/common"
 import { CqrsModule } from "@nestjs/cqrs"
-import { RoleRepository, PermissionRepository, UserPermissionRepository } from "@authorization/integration/repositories"
+import {
+  RoleRepository,
+  PermissionRepository,
+  UserPermissionRepository,
+} from "@authorization/integration/repositories"
 import { RoleController } from "@authorization/presentation/restful/role.controller"
 import { PermissionController } from "@authorization/presentation/restful/permission.controller"
 import { UserRoleController } from "@authorization/presentation/restful/user-role.controller"
@@ -8,7 +12,11 @@ import { UserPermissionController } from "@authorization/presentation/restful/us
 import { StatsController } from "@authorization/presentation/restful/stats.controller"
 import { AuditController } from "@authorization/presentation/restful/audit.controller"
 import HANDLERS from "@authorization/capabilities/handlers"
-import { IRoleRepository, IPermissionRepository, IUserPermissionRepository } from "./business/repositories"
+import {
+  IRoleRepository,
+  IPermissionRepository,
+  IUserPermissionRepository,
+} from "./business/repositories"
 import { RepositoryService } from "@shared/integration/services"
 import { AccountModule } from "@account/account.module"
 import { AuthorizationService } from "./business/services/authorization.service"
@@ -17,7 +25,14 @@ import { AuditHandler } from "@shared/capabilities/handlers"
 
 @Module({
   imports: [CqrsModule, forwardRef(() => AccountModule)],
-  controllers: [RoleController, PermissionController, UserRoleController, UserPermissionController, StatsController, AuditController],
+  controllers: [
+    RoleController,
+    PermissionController,
+    UserRoleController,
+    UserPermissionController,
+    StatsController,
+    AuditController,
+  ],
   providers: [
     RepositoryService,
     {

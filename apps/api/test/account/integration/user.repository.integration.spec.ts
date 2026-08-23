@@ -1,10 +1,7 @@
 import { UserRepository } from "@account/integration/repositories/user.repository"
 import { User } from "@account/business/entities"
-import { Status } from '@database/prisma/generated-client'
-import {
-  createTestDatabase,
-  cleanDatabase,
-} from "../../helpers/database.helper"
+import { Status } from "@database/prisma/generated-client"
+import { createTestDatabase, cleanDatabase } from "../../helpers/database.helper"
 
 /**
  * UserRepository Integration Tests

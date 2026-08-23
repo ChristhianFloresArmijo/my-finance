@@ -1,7 +1,7 @@
 import { Repository } from "@shared/business/repositories"
 import { RefreshToken } from "../entities/refresh-token.entity"
 import { ErrorCollection, Result } from "@shared/business/utils/error-handling"
-import { Prisma } from '@database/prisma/generated-client'
+import { Prisma } from "@database/prisma/generated-client"
 
 export abstract class IRefreshTokenRepository extends Repository<RefreshToken> {
   abstract findByUserToken(

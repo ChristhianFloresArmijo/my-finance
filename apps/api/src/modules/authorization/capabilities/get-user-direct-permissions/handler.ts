@@ -7,10 +7,10 @@ import { GetUserDirectPermissionsQuery } from "./query"
 import { failure, HandlerError, Result, success } from "@shared/business/utils/error-handling"
 
 @QueryHandler(GetUserDirectPermissionsQuery)
-export class GetUserDirectPermissionsHandler
-  implements
-    IQueryHandler<GetUserDirectPermissionsQuery, Result<UserPermission[], HandlerError>>
-{
+export class GetUserDirectPermissionsHandler implements IQueryHandler<
+  GetUserDirectPermissionsQuery,
+  Result<UserPermission[], HandlerError>
+> {
   constructor(
     private readonly userPermissionRepository: IUserPermissionRepository,
     private readonly userRepository: IUserRepository,

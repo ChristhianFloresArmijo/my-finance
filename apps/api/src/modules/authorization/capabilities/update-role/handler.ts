@@ -16,9 +16,15 @@ export class UpdateRoleHandler extends AuditableCommandHandler<UpdateRoleCommand
     super(eventBus)
   }
 
-  protected getAction() { return "update-role" }
-  protected getEntityType() { return "Role" }
-  protected getEntityId(command: UpdateRoleCommand) { return command.id }
+  protected getAction() {
+    return "update-role"
+  }
+  protected getEntityType() {
+    return "Role"
+  }
+  protected getEntityId(command: UpdateRoleCommand) {
+    return command.id
+  }
   protected getSafePayload(command: UpdateRoleCommand) {
     return { id: command.id, ...command.data }
   }
@@ -53,7 +59,10 @@ export class UpdateRoleHandler extends AuditableCommandHandler<UpdateRoleCommand
       ...existingRole,
       name: command.data.name ?? existingRole.name,
       display_name: command.data.display_name ?? existingRole.display_name,
-      description: command.data.description !== undefined ? command.data.description : existingRole.description,
+      description:
+        command.data.description !== undefined
+          ? command.data.description
+          : existingRole.description,
       is_system: command.data.is_system ?? existingRole.is_system,
       status: command.data.status ?? existingRole.status,
     })

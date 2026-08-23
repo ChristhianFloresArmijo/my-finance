@@ -34,10 +34,10 @@ export class RegenerateRecoveryCodesHandler implements ICommandHandler<
     await this.prisma.userRecoveryCode.deleteMany({ where: { user_id: command.userId } })
 
     const plainCodes = this.totpService.generateRecoveryCodes()
-    const hashed = await Promise.all(plainCodes.map(c => this.totpService.hashRecoveryCode(c)))
+    const hashed = await Promise.all(plainCodes.map((c) => this.totpService.hashRecoveryCode(c)))
 
     await this.prisma.userRecoveryCode.createMany({
-      data: hashed.map(code_hash => ({ user_id: command.userId, code_hash })),
+      data: hashed.map((code_hash) => ({ user_id: command.userId, code_hash })),
     })
 
     return success({ recovery_codes: plainCodes })

@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 export class CreateRoleDto {
   @ApiProperty({

@@ -4,7 +4,11 @@ import { InternalServerErrorException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { CreateUserHandler } from "@account/capabilities/create-user/handler"
 import { CreateUserCommand } from "@account/capabilities/create-user/command"
-import { IUserRepository, IUserProfileRepository, IUserPreferencesRepository } from "@account/business/repositories"
+import {
+  IUserRepository,
+  IUserProfileRepository,
+  IUserPreferencesRepository,
+} from "@account/business/repositories"
 import { IRoleRepository } from "@authorization/business/repositories"
 import { MailService } from "@shared/integration/mail/MailService"
 import { Status } from "@database/prisma/generated-client"
@@ -184,7 +188,9 @@ describe("CreateUserHandler", () => {
     mockRoleRepo.findById.mockResolvedValueOnce(success(null))
     jest.spyOn(console, "warn").mockImplementation(() => {})
 
-    const result = await handler.execute(new CreateUserCommand({ ...VALID_DATA, role_ids: ["ghost-role"] }))
+    const result = await handler.execute(
+      new CreateUserCommand({ ...VALID_DATA, role_ids: ["ghost-role"] }),
+    )
 
     expect(result.isOk).toBe(true)
     expect(mockRoleRepo.assignRoleToUser).not.toHaveBeenCalled()

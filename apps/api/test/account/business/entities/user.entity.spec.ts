@@ -1,5 +1,5 @@
 import { User } from "@account/business/entities/user.entity"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 describe("User Entity", () => {
   // Test to ensure the User class is defined and can be imported correctly

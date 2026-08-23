@@ -11,7 +11,7 @@ import {
   createMockRoleData,
   createMockUserRoleData,
 } from "../../helpers/mock-factories"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 describe("AssignRoleToUserHandler", () => {
   let handler: AssignRoleToUserHandler

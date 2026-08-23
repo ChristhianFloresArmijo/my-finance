@@ -1,6 +1,6 @@
 import { RefreshTokenRepository } from "@auth/integration/repositories/refresh-token.repository"
 import { RefreshToken } from "@auth/business/entities/refresh-token.entity"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { createTestDatabase, cleanDatabase } from "../../helpers/database.helper"
 import { createMockRefreshToken } from "../../helpers/mock-factories/refresh-token.factory"
 

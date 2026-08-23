@@ -1,4 +1,4 @@
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { Role } from "@authorization/business/entities/role.entity"
 import { createMockRoleData } from "../../../helpers/mock-factories"
 

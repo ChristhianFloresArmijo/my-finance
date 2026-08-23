@@ -1,6 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsArray, IsString, IsUUID } from "class-validator"
-import { Status } from '@database/prisma/generated-client'
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsString,
+  IsUUID,
+} from "class-validator"
+import { Status } from "@database/prisma/generated-client"
 
 export class NewUserSerializer {
   @ApiProperty({

@@ -11,7 +11,10 @@ export interface SetupTotpResult {
 }
 
 @CommandHandler(SetupTotpCommand)
-export class SetupTotpHandler implements ICommandHandler<SetupTotpCommand, Result<SetupTotpResult, HandlerError>> {
+export class SetupTotpHandler implements ICommandHandler<
+  SetupTotpCommand,
+  Result<SetupTotpResult, HandlerError>
+> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly totpService: TotpService,

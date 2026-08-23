@@ -1,4 +1,4 @@
-import { UserPermission as PrismaUserPermission, Status } from '@database/prisma/generated-client'
+import { UserPermission as PrismaUserPermission, Status } from "@database/prisma/generated-client"
 import { CommonTimeStamps, MakePartial } from "@shared/business/types"
 import { ensureIsValidEntity } from "@shared/business/entities/validate-entity"
 import { ErrorCollection, failure, Result, success } from "@shared/business/utils/error-handling"

@@ -6,7 +6,10 @@ import { failure, HandlerError, Result, success } from "@shared/business/utils/e
 import { DisableTotpCommand } from "./command"
 
 @CommandHandler(DisableTotpCommand)
-export class DisableTotpHandler implements ICommandHandler<DisableTotpCommand, Result<true, HandlerError>> {
+export class DisableTotpHandler implements ICommandHandler<
+  DisableTotpCommand,
+  Result<true, HandlerError>
+> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly totpService: TotpService,

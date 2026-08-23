@@ -39,7 +39,9 @@ export class SignInHandler implements ICommandHandler<
     const user = validationResult.value
 
     // Update last_login only — targeted update avoids spreading stale entity fields back to DB
-    this.prisma.user.update({ where: { id: user.id }, data: { last_login: new Date() } }).catch(() => {})
+    this.prisma.user
+      .update({ where: { id: user.id }, data: { last_login: new Date() } })
+      .catch(() => {})
 
     const freshUser = await this.prisma.user.findUnique({
       where: { id: user.id },

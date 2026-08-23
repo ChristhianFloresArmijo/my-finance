@@ -15,7 +15,11 @@ describe("ChangePasswordHandler", () => {
   let mockEventBus: jest.Mocked<Pick<EventBus, "publish">>
 
   const makeCommand = (current: string, next: string, confirm = next) =>
-    new ChangePasswordCommand(USER_ID, { current_password: current, new_password: next, repassword: confirm })
+    new ChangePasswordCommand(USER_ID, {
+      current_password: current,
+      new_password: next,
+      repassword: confirm,
+    })
 
   beforeEach(async () => {
     mockUserRepo = {

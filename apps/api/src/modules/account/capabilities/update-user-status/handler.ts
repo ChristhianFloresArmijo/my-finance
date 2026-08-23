@@ -6,7 +6,10 @@ import { failure, HandlerError, Result, success } from "@shared/business/utils/e
 import { AuditableCommandHandler } from "@shared/capabilities/handlers"
 
 @CommandHandler(UpdateUserStatusCommand)
-export class UpdateUserStatusHandler extends AuditableCommandHandler<UpdateUserStatusCommand, true> {
+export class UpdateUserStatusHandler extends AuditableCommandHandler<
+  UpdateUserStatusCommand,
+  true
+> {
   constructor(
     private readonly repository: IUserRepository,
     eventBus: EventBus,
@@ -14,14 +17,22 @@ export class UpdateUserStatusHandler extends AuditableCommandHandler<UpdateUserS
     super(eventBus)
   }
 
-  protected getAction() { return "update-user-status" }
-  protected getEntityType() { return "User" }
-  protected getEntityId(command: UpdateUserStatusCommand) { return command.userId }
+  protected getAction() {
+    return "update-user-status"
+  }
+  protected getEntityType() {
+    return "User"
+  }
+  protected getEntityId(command: UpdateUserStatusCommand) {
+    return command.userId
+  }
   protected getSafePayload(command: UpdateUserStatusCommand) {
     return { status: command.status }
   }
 
-  protected async executeCommand(command: UpdateUserStatusCommand): Promise<Result<true, HandlerError>> {
+  protected async executeCommand(
+    command: UpdateUserStatusCommand,
+  ): Promise<Result<true, HandlerError>> {
     const userResult = await this.repository.findById(command.userId)
     if (!userResult.isOk) return failure(new InternalServerErrorException(userResult.error))
     if (!userResult.value) return failure(new NotFoundException("User not found"))

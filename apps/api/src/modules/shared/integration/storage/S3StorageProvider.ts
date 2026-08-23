@@ -23,8 +23,7 @@ export class S3StorageProvider implements IStorageProvider {
     this.bucket = config.get<string>("storage.s3Bucket") ?? ""
     const region = config.get<string>("storage.s3Region") ?? "us-east-1"
     this.baseUrl =
-      config.get<string>("storage.s3BaseUrl") ??
-      `https://${this.bucket}.s3.${region}.amazonaws.com`
+      config.get<string>("storage.s3BaseUrl") ?? `https://${this.bucket}.s3.${region}.amazonaws.com`
 
     // Lazy-load the AWS SDK so the app starts even when the package is not installed
     try {
@@ -57,8 +56,6 @@ export class S3StorageProvider implements IStorageProvider {
     const { DeleteObjectCommand } = require("@aws-sdk/client-s3")
     // Extract the S3 key from the URL
     const key = url.replace(`${this.baseUrl}/`, "")
-    await this.client.send(
-      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
-    )
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
   }
 }

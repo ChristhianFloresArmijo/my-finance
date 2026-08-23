@@ -4,7 +4,7 @@
  * Utilities for setting up and tearing down test database.
  */
 
-import { PrismaClient } from '@database/prisma/generated-client'
+import { PrismaClient } from "@database/prisma/generated-client"
 import { PrismaService } from "@shared/integration/services/prisma.service"
 
 /**
@@ -65,7 +65,7 @@ export const teardownTestDatabase = async (prisma: PrismaService): Promise<void>
     console.warn("PrismaService is undefined in teardown")
     return
   }
-  
+
   try {
     await cleanDatabase(prisma)
     await prisma.$disconnect()

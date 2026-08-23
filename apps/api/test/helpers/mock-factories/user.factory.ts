@@ -1,5 +1,5 @@
 import { User } from "@account/business/entities/user.entity"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { v4 as uuidv4 } from "uuid"
 
 /**

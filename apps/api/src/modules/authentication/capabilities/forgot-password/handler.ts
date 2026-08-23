@@ -8,7 +8,10 @@ import { MailService } from "@shared/integration/mail/MailService"
 import { failure, HandlerError, Result, success } from "@shared/business/utils/error-handling"
 
 @CommandHandler(ForgotPasswordCommand)
-export class ForgotPasswordHandler implements ICommandHandler<ForgotPasswordCommand, Result<true, HandlerError>> {
+export class ForgotPasswordHandler implements ICommandHandler<
+  ForgotPasswordCommand,
+  Result<true, HandlerError>
+> {
   constructor(
     private readonly client: PrismaService,
     private readonly configService: ConfigService,

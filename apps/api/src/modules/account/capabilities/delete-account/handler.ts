@@ -16,12 +16,22 @@ export class DeleteAccountHandler extends AuditableCommandHandler<DeleteAccountC
     super(eventBus)
   }
 
-  protected getAction() { return "delete-account" }
-  protected getEntityType() { return "User" }
-  protected getEntityId(command: DeleteAccountCommand) { return command.userId }
-  protected getPerformedBy(command: DeleteAccountCommand) { return command.userId }
+  protected getAction() {
+    return "delete-account"
+  }
+  protected getEntityType() {
+    return "User"
+  }
+  protected getEntityId(command: DeleteAccountCommand) {
+    return command.userId
+  }
+  protected getPerformedBy(command: DeleteAccountCommand) {
+    return command.userId
+  }
 
-  protected async executeCommand(command: DeleteAccountCommand): Promise<Result<true, HandlerError>> {
+  protected async executeCommand(
+    command: DeleteAccountCommand,
+  ): Promise<Result<true, HandlerError>> {
     // 1. Load user entity (needed for comparePassword)
     const userResult = await this.repository.findById(command.userId)
     if (!userResult.isOk) return failure(new InternalServerErrorException(userResult.error))

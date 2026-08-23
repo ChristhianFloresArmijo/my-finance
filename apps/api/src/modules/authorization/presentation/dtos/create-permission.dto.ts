@@ -23,7 +23,8 @@ export class CreatePermissionDto {
   @MinLength(2)
   @MaxLength(100)
   @Matches(/^[a-z][a-z0-9_-]*$/, {
-    message: "Resource must be lowercase alphanumeric with hyphens/underscores, starting with a letter",
+    message:
+      "Resource must be lowercase alphanumeric with hyphens/underscores, starting with a letter",
   })
   resource: string
 
@@ -38,12 +39,14 @@ export class CreatePermissionDto {
   @MinLength(2)
   @MaxLength(100)
   @Matches(/^[a-z][a-z0-9_-]*$/, {
-    message: "Action must be lowercase alphanumeric with hyphens/underscores, starting with a letter",
+    message:
+      "Action must be lowercase alphanumeric with hyphens/underscores, starting with a letter",
   })
   action: string
 
   @ApiProperty({
-    description: "Scope — ALL: any record, OWN: user's own records only, TEAM: user's team records, ORG: user's org records",
+    description:
+      "Scope — ALL: any record, OWN: user's own records only, TEAM: user's team records, ORG: user's org records",
     example: PermissionScope.ALL,
     enum: PermissionScope,
     default: PermissionScope.ALL,

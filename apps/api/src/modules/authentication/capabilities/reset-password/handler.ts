@@ -9,7 +9,10 @@ import { Status } from "@database/prisma/generated-client"
 import { failure, HandlerError, Result, success } from "@shared/business/utils/error-handling"
 
 @CommandHandler(ResetPasswordCommand)
-export class ResetPasswordHandler implements ICommandHandler<ResetPasswordCommand, Result<true, HandlerError>> {
+export class ResetPasswordHandler implements ICommandHandler<
+  ResetPasswordCommand,
+  Result<true, HandlerError>
+> {
   constructor(
     private readonly repository: IUserRepository,
     private readonly client: PrismaService,

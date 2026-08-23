@@ -37,7 +37,11 @@ import {
 } from "@account/capabilities/commands"
 import { FindUserByIdQuery, ListUsersQuery } from "@account/capabilities/queries"
 import { ListUserSessionsQuery } from "@auth/capabilities/queries"
-import { RevokeSessionCommand, RevokeAllSessionsCommand, AdminDisable2faCommand } from "@auth/capabilities/commands"
+import {
+  RevokeSessionCommand,
+  RevokeAllSessionsCommand,
+  AdminDisable2faCommand,
+} from "@auth/capabilities/commands"
 import { RefreshTokenDto } from "@auth/presentation/dtos"
 import { JwtAuthGuard } from "@auth/capabilities/guards"
 import { RolesGuard, IsOwnerGuard } from "@authorization/capabilities/guards"
@@ -116,9 +120,10 @@ export class UserController {
   @RequireRole("admin", "superadmin")
   @Get(":id")
   async retrieve(@Param("id") id: string): Promise<CurrentUserDto> {
-    const result = await this.queryBus.execute<FindUserByIdQuery, Result<CurrentUserDto, HandlerError>>(
-      new FindUserByIdQuery(id),
-    )
+    const result = await this.queryBus.execute<
+      FindUserByIdQuery,
+      Result<CurrentUserDto, HandlerError>
+    >(new FindUserByIdQuery(id))
     if (result.isOk) return result.value
     throw result.error
   }
@@ -162,9 +167,7 @@ export class UserController {
   @HttpCode(200)
   @Post(":id/suspend")
   async suspend(@Param("id") id: string): Promise<{ message: string }> {
-    const result = await this.commandBus.execute(
-      new UpdateUserStatusCommand(id, "SUSPENDED"),
-    )
+    const result = await this.commandBus.execute(new UpdateUserStatusCommand(id, "SUSPENDED"))
     if (!result.isOk) throw result.error
     return { message: "User suspended" }
   }
@@ -178,9 +181,7 @@ export class UserController {
   @HttpCode(200)
   @Post(":id/activate")
   async activate(@Param("id") id: string): Promise<{ message: string }> {
-    const result = await this.commandBus.execute(
-      new UpdateUserStatusCommand(id, "ACTIVE"),
-    )
+    const result = await this.commandBus.execute(new UpdateUserStatusCommand(id, "ACTIVE"))
     if (!result.isOk) throw result.error
     return { message: "User activated" }
   }
@@ -212,9 +213,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get("me")
   async getMe(@CurrentUser() user: { sub: string }): Promise<CurrentUserDto> {
-    const result = await this.queryBus.execute<FindUserByIdQuery, Result<CurrentUserDto, HandlerError>>(
-      new FindUserByIdQuery(user.sub),
-    )
+    const result = await this.queryBus.execute<
+      FindUserByIdQuery,
+      Result<CurrentUserDto, HandlerError>
+    >(new FindUserByIdQuery(user.sub))
     if (result.isOk) return result.value
     throw result.error
   }
@@ -224,7 +226,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
   @Put("me")
-  async updateMe(@CurrentUser() user: { sub: string }, @Body() dto: UpdateAccountDto): Promise<User> {
+  async updateMe(
+    @CurrentUser() user: { sub: string },
+    @Body() dto: UpdateAccountDto,
+  ): Promise<User> {
     const result = await this.commandBus.execute(new UpdateAccountCommand(user.sub, dto))
     if (!result.isOk) throw result.error
     return result.value
@@ -319,9 +324,10 @@ export class UserController {
   @HttpCode(200)
   @Delete(":id/sessions")
   async revokeAllSessions(@Param("id") id: string): Promise<{ message: string }> {
-    const result = await this.commandBus.execute<RevokeAllSessionsCommand, Result<true, HandlerError>>(
-      new RevokeAllSessionsCommand(id, undefined),
-    )
+    const result = await this.commandBus.execute<
+      RevokeAllSessionsCommand,
+      Result<true, HandlerError>
+    >(new RevokeAllSessionsCommand(id, undefined))
     if (result.isOk) return { message: "All sessions revoked" }
     throw result.error
   }
@@ -359,9 +365,10 @@ export class UserController {
   @HttpCode(200)
   @Delete(":id/2fa")
   async adminDisable2fa(@Param("id") id: string): Promise<{ message: string }> {
-    const result = await this.commandBus.execute<AdminDisable2faCommand, Result<true, HandlerError>>(
-      new AdminDisable2faCommand(id),
-    )
+    const result = await this.commandBus.execute<
+      AdminDisable2faCommand,
+      Result<true, HandlerError>
+    >(new AdminDisable2faCommand(id))
     if (result.isOk) return { message: "2FA disabled" }
     throw result.error
   }

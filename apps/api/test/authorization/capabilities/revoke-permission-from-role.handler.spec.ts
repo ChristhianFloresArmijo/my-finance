@@ -10,7 +10,7 @@ import {
   createMockPermissionData,
   createMockRolePermissionData,
 } from "../../helpers/mock-factories"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 describe("RevokePermissionFromRoleHandler", () => {
   let handler: RevokePermissionFromRoleHandler

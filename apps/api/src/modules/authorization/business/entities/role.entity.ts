@@ -1,4 +1,4 @@
-import { Role as PrismaRole, Status } from '@database/prisma/generated-client'
+import { Role as PrismaRole, Status } from "@database/prisma/generated-client"
 import { ensureIsValidEntity } from "@shared/business/entities/validate-entity"
 import { CommonTimeStamps, MakePartial } from "@shared/business/types"
 import { ErrorCollection, failure, Result, success } from "@shared/business/utils/error-handling"

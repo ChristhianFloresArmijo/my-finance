@@ -6,7 +6,7 @@ import { IRoleRepository } from "@authorization/business/repositories"
 import { Role } from "@authorization/business/entities"
 import { success, failure } from "@shared/business/utils/error-handling"
 import { createMockRoleData } from "../../helpers/mock-factories"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 describe("CreateRoleHandler", () => {
   let handler: CreateRoleHandler

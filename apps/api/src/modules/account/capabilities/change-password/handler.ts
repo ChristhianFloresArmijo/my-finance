@@ -16,12 +16,22 @@ export class ChangePasswordHandler extends AuditableCommandHandler<ChangePasswor
     super(eventBus)
   }
 
-  protected getAction() { return "change-password" }
-  protected getEntityType() { return "User" }
-  protected getEntityId(command: ChangePasswordCommand) { return command.userId }
-  protected getPerformedBy(command: ChangePasswordCommand) { return command.userId }
+  protected getAction() {
+    return "change-password"
+  }
+  protected getEntityType() {
+    return "User"
+  }
+  protected getEntityId(command: ChangePasswordCommand) {
+    return command.userId
+  }
+  protected getPerformedBy(command: ChangePasswordCommand) {
+    return command.userId
+  }
 
-  protected async executeCommand(command: ChangePasswordCommand): Promise<Result<true, HandlerError>> {
+  protected async executeCommand(
+    command: ChangePasswordCommand,
+  ): Promise<Result<true, HandlerError>> {
     // 1. Load user entity (needed for comparePassword)
     const userResult = await this.repository.findById(command.userId)
     if (!userResult.isOk) return failure(new InternalServerErrorException(userResult.error))

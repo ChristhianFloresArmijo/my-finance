@@ -6,7 +6,7 @@ import { IPermissionRepository } from "@authorization/business/repositories"
 import { Permission } from "@authorization/business/entities"
 import { success, failure } from "@shared/business/utils/error-handling"
 import { createMockPermissionData } from "../../helpers/mock-factories"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 describe("UpdatePermissionHandler", () => {
   let handler: UpdatePermissionHandler

@@ -5,7 +5,10 @@ import { PrismaService } from "@shared/integration/services"
 import { failure, HandlerError, Result, success } from "@shared/business/utils/error-handling"
 
 @CommandHandler(VerifyEmailCommand)
-export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand, Result<true, HandlerError>> {
+export class VerifyEmailHandler implements ICommandHandler<
+  VerifyEmailCommand,
+  Result<true, HandlerError>
+> {
   constructor(private readonly client: PrismaService) {}
 
   async execute(command: VerifyEmailCommand): Promise<Result<true, HandlerError>> {

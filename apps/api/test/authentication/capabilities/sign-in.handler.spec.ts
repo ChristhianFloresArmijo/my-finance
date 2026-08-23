@@ -60,7 +60,9 @@ describe("SignInHandler", () => {
   })
 
   it("returns failure when credentials are invalid", async () => {
-    mockQueryBus.execute.mockResolvedValueOnce(failure(new UnauthorizedException("Invalid credentials")))
+    mockQueryBus.execute.mockResolvedValueOnce(
+      failure(new UnauthorizedException("Invalid credentials")),
+    )
 
     const result = await handler.execute(new SignInCommand("bad@example.com", "wrong"))
 
@@ -72,7 +74,9 @@ describe("SignInHandler", () => {
     const user = createMockUser()
     mockQueryBus.execute.mockResolvedValueOnce(success(user))
     mockPrismaUser.findUnique.mockResolvedValueOnce({ totp_enabled: false })
-    mockCommandBus.execute.mockResolvedValueOnce(failure(new InternalServerErrorException("Token error")))
+    mockCommandBus.execute.mockResolvedValueOnce(
+      failure(new InternalServerErrorException("Token error")),
+    )
 
     const result = await handler.execute(new SignInCommand("user@example.com", "pass"))
 
@@ -141,7 +145,9 @@ describe("SignInHandler", () => {
   })
 
   it("does not expose user details in auth failure messages", async () => {
-    mockQueryBus.execute.mockResolvedValueOnce(failure(new UnauthorizedException("Invalid email or password")))
+    mockQueryBus.execute.mockResolvedValueOnce(
+      failure(new UnauthorizedException("Invalid email or password")),
+    )
 
     const result = await handler.execute(new SignInCommand("user@example.com", "wrong"))
 

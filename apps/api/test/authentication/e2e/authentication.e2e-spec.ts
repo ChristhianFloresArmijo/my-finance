@@ -78,7 +78,9 @@ describe("Authentication (E2E)", () => {
     })
 
     it("POST /auth/sign-in returns 400 for missing fields", async () => {
-      const res = await request(app.getHttpServer()).post("/auth/sign-in").send({ email: "x@x.com" })
+      const res = await request(app.getHttpServer())
+        .post("/auth/sign-in")
+        .send({ email: "x@x.com" })
       expect([400, 401]).toContain(res.status)
     })
   })
@@ -135,7 +137,9 @@ describe("Authentication (E2E)", () => {
       expect(meRes.body.data?.email ?? meRes.body.email).toBe(SIGN_UP_PAYLOAD.email)
 
       // 4. Sign out
-      const signOutRes = await request(app.getHttpServer()).post("/auth/sign-out").set("Cookie", cookies)
+      const signOutRes = await request(app.getHttpServer())
+        .post("/auth/sign-out")
+        .set("Cookie", cookies)
       expect(signOutRes.status).toBe(200)
 
       // 5. /me should be 401 now
@@ -169,7 +173,9 @@ describe("Authentication (E2E)", () => {
       })
       const cookies = extractCookies(signInRes)
 
-      const refreshRes = await request(app.getHttpServer()).post("/auth/refresh").set("Cookie", cookies)
+      const refreshRes = await request(app.getHttpServer())
+        .post("/auth/refresh")
+        .set("Cookie", cookies)
       expect(refreshRes.status).toBe(200)
       // New cookies should be set
       expect(refreshRes.headers["set-cookie"]).toBeDefined()
@@ -213,7 +219,9 @@ describe("Authentication (E2E)", () => {
     })
 
     it("POST /auth/2fa/enable requires authentication", async () => {
-      const res = await request(app.getHttpServer()).post("/auth/2fa/enable").send({ code: "123456" })
+      const res = await request(app.getHttpServer())
+        .post("/auth/2fa/enable")
+        .send({ code: "123456" })
       expect(res.status).toBe(401)
     })
 
@@ -230,7 +238,9 @@ describe("Authentication (E2E)", () => {
       })
       const cookies = extractCookies(signInRes)
 
-      const statusRes = await request(app.getHttpServer()).get("/auth/2fa/status").set("Cookie", cookies)
+      const statusRes = await request(app.getHttpServer())
+        .get("/auth/2fa/status")
+        .set("Cookie", cookies)
       expect(statusRes.status).toBe(200)
       const body = statusRes.body.data ?? statusRes.body
       expect(typeof body.totp_enabled).toBe("boolean")
@@ -245,7 +255,9 @@ describe("Authentication (E2E)", () => {
       })
       const cookies = extractCookies(signInRes)
 
-      const setupRes = await request(app.getHttpServer()).post("/auth/2fa/setup").set("Cookie", cookies)
+      const setupRes = await request(app.getHttpServer())
+        .post("/auth/2fa/setup")
+        .set("Cookie", cookies)
       expect(setupRes.status).toBe(201)
       const body = setupRes.body.data ?? setupRes.body
       expect(body.uri).toMatch(/^otpauth:\/\/totp\//)

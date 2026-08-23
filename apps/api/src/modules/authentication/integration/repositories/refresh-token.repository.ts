@@ -1,7 +1,7 @@
 import { RefreshToken } from "@auth/business/entities/refresh-token.entity"
 import { IRefreshTokenRepository } from "@auth/business/repositories"
 import { Injectable } from "@nestjs/common"
-import { Prisma, Status } from '@database/prisma/generated-client'
+import { Prisma, Status } from "@database/prisma/generated-client"
 import { Result, ErrorCollection, success, failure } from "@shared/business/utils/error-handling"
 import { RepositoryService } from "@shared/integration/services"
 

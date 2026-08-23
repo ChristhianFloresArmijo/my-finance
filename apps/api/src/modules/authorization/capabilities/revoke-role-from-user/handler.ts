@@ -9,7 +9,10 @@ import { failure, HandlerError, Result, success } from "@shared/business/utils/e
 import { AuditableCommandHandler } from "@shared/capabilities/handlers"
 
 @CommandHandler(RevokeRoleFromUserCommand)
-export class RevokeRoleFromUserHandler extends AuditableCommandHandler<RevokeRoleFromUserCommand, UserRole> {
+export class RevokeRoleFromUserHandler extends AuditableCommandHandler<
+  RevokeRoleFromUserCommand,
+  UserRole
+> {
   constructor(
     private readonly roleRepository: IRoleRepository,
     private readonly userRepository: IUserRepository,
@@ -18,13 +21,19 @@ export class RevokeRoleFromUserHandler extends AuditableCommandHandler<RevokeRol
     super(eventBus)
   }
 
-  protected getAction() { return "revoke-role-from-user" }
-  protected getEntityType() { return "UserRole" }
+  protected getAction() {
+    return "revoke-role-from-user"
+  }
+  protected getEntityType() {
+    return "UserRole"
+  }
   protected getSafePayload(command: RevokeRoleFromUserCommand) {
     return { user_id: command.userId, role_id: command.roleId }
   }
 
-  protected async executeCommand(command: RevokeRoleFromUserCommand): Promise<Result<UserRole, HandlerError>> {
+  protected async executeCommand(
+    command: RevokeRoleFromUserCommand,
+  ): Promise<Result<UserRole, HandlerError>> {
     const userResult = await this.userRepository.findById(command.userId)
     if (!userResult.isOk) {
       return failure(new InternalServerErrorException(userResult.error))

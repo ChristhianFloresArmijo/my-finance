@@ -5,7 +5,10 @@ import { failure, HandlerError, Result, success } from "@shared/business/utils/e
 import { AdminDisable2faCommand } from "./command"
 
 @CommandHandler(AdminDisable2faCommand)
-export class AdminDisable2faHandler implements ICommandHandler<AdminDisable2faCommand, Result<true, HandlerError>> {
+export class AdminDisable2faHandler implements ICommandHandler<
+  AdminDisable2faCommand,
+  Result<true, HandlerError>
+> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: AdminDisable2faCommand): Promise<Result<true, HandlerError>> {
@@ -15,7 +18,8 @@ export class AdminDisable2faHandler implements ICommandHandler<AdminDisable2faCo
     })
 
     if (!user) return failure(new NotFoundException("User not found"))
-    if (!user.totp_enabled) return failure(new BadRequestException("2FA is not enabled for this user"))
+    if (!user.totp_enabled)
+      return failure(new BadRequestException("2FA is not enabled for this user"))
 
     await this.prisma.user.update({
       where: { id: command.targetUserId },

@@ -1,4 +1,4 @@
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { UserRole } from "@authorization/business/entities/user-role.entity"
 import {
   createMockUserRoleData,

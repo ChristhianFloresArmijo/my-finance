@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { Permission, UserPermission } from "@authorization/business/entities"
-import { Prisma, Status } from '@database/prisma/generated-client'
+import { Prisma, Status } from "@database/prisma/generated-client"
 import { RepositoryService } from "@shared/integration/services"
 import { IUserPermissionRepository } from "@authorization/business/repositories"
 import { ErrorCollection, Result, success, failure } from "@shared/business/utils/error-handling"
@@ -130,7 +130,9 @@ export class UserPermissionRepository
     }
   }
 
-  async getUserDirectPermissionEntities(userId: string): Promise<Result<Permission[], ErrorCollection>> {
+  async getUserDirectPermissionEntities(
+    userId: string,
+  ): Promise<Result<Permission[], ErrorCollection>> {
     try {
       const now = new Date()
       const records = await this.client.userPermission.findMany({

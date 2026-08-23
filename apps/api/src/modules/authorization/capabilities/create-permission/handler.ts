@@ -30,7 +30,11 @@ export class CreatePermissionHandler extends AuditableCommandHandler<
     return value.id
   }
   protected getSafePayload(command: CreatePermissionCommand) {
-    return { resource: command.data.resource, action: command.data.action, scope: command.data.scope ?? PermissionScope.ALL }
+    return {
+      resource: command.data.resource,
+      action: command.data.action,
+      scope: command.data.scope ?? PermissionScope.ALL,
+    }
   }
 
   protected async executeCommand(

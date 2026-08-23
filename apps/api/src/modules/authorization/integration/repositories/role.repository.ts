@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { Permission, Role, RolePermission, UserRole } from "@authorization/business/entities"
-import { Prisma, Status } from '@database/prisma/generated-client'
+import { Prisma, Status } from "@database/prisma/generated-client"
 import { RepositoryService } from "@shared/integration/services"
 import { IRoleRepository } from "@authorization/business/repositories"
 import { ErrorCollection, Result, success, failure } from "@shared/business/utils/error-handling"
@@ -26,7 +26,8 @@ export class RoleRepository extends RepositoryService<Role> implements IRoleRepo
       if (existingAssignment) {
         // Block if the assignment is already active and not expired
         const isActive = existingAssignment.status === Status.ACTIVE
-        const isNotExpired = !existingAssignment.expires_at || existingAssignment.expires_at > new Date()
+        const isNotExpired =
+          !existingAssignment.expires_at || existingAssignment.expires_at > new Date()
         if (isActive && isNotExpired) {
           return failure({ assignment: ["User already has this role assigned"] })
         }
@@ -340,7 +341,7 @@ export class RoleRepository extends RepositoryService<Role> implements IRoleRepo
       if (!role) return success(null)
       return this.builder.instance(role)
     } catch (error) {
-      return failure({ role: [error.message || 'Failed to find role by name'] })
+      return failure({ role: [error.message || "Failed to find role by name"] })
     }
   }
 }

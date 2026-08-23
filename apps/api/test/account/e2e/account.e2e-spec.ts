@@ -4,7 +4,7 @@ import * as request from "supertest"
 import * as cookieParser from "cookie-parser"
 import { AppModule } from "../../../src/app.module"
 import { PrismaService } from "@shared/integration/services/prisma.service"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { cleanDatabase } from "../../helpers/database.helper"
 
 /**

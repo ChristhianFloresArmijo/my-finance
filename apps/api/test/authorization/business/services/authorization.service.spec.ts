@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { AuthorizationService } from "@authorization/business/services/authorization.service"
 import { IRoleRepository, IPermissionRepository } from "@authorization/business/repositories"
 import { success, failure } from "@shared/business/utils/error-handling"

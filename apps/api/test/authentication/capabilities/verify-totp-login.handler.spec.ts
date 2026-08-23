@@ -40,7 +40,10 @@ describe("VerifyTotpLoginHandler", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VerifyTotpLoginHandler,
-        { provide: PrismaService, useValue: { user: mockPrismaUser, userRecoveryCode: mockPrismaRecovery } },
+        {
+          provide: PrismaService,
+          useValue: { user: mockPrismaUser, userRecoveryCode: mockPrismaRecovery },
+        },
         { provide: TotpService, useValue: mockTotpService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue(JWT_SECRET) } },
@@ -56,7 +59,9 @@ describe("VerifyTotpLoginHandler", () => {
   // ─── Pending token validation ─────────────────────────────────────────────
 
   it("returns failure for invalid pending token", async () => {
-    mockJwtService.verify.mockImplementation(() => { throw new Error("invalid") })
+    mockJwtService.verify.mockImplementation(() => {
+      throw new Error("invalid")
+    })
 
     const result = await handler.execute(new VerifyTotpLoginCommand("bad-token", "123456"))
 
@@ -74,7 +79,9 @@ describe("VerifyTotpLoginHandler", () => {
   })
 
   it("verifies pending token using the derived secret", async () => {
-    mockJwtService.verify.mockImplementation(() => { throw new Error("invalid") })
+    mockJwtService.verify.mockImplementation(() => {
+      throw new Error("invalid")
+    })
 
     await handler.execute(new VerifyTotpLoginCommand("tok", "123456"))
 
@@ -90,7 +97,9 @@ describe("VerifyTotpLoginHandler", () => {
       .mockResolvedValueOnce({ id: VALID_USER_ID, totp_secret: "SECRET", totp_enabled: true })
       .mockResolvedValueOnce(fullUser)
     mockTotpService.verifyCode.mockReturnValue(true)
-    mockCommandBus.execute.mockResolvedValueOnce(success({ access_token: "at", refresh_token: "rt" }))
+    mockCommandBus.execute.mockResolvedValueOnce(
+      success({ access_token: "at", refresh_token: "rt" }),
+    )
 
     const result = await handler.execute(new VerifyTotpLoginCommand("pending-tok", "123456"))
 
@@ -116,9 +125,11 @@ describe("VerifyTotpLoginHandler", () => {
     mockTotpService.verifyCode.mockReturnValue(false)
     mockPrismaRecovery.findMany.mockResolvedValueOnce(recoveryCodes)
     mockTotpService.verifyRecoveryCode
-      .mockResolvedValueOnce(false)  // rc-1 doesn't match
-      .mockResolvedValueOnce(true)   // rc-2 matches
-    mockCommandBus.execute.mockResolvedValueOnce(success({ access_token: "at", refresh_token: "rt" }))
+      .mockResolvedValueOnce(false) // rc-1 doesn't match
+      .mockResolvedValueOnce(true) // rc-2 matches
+    mockCommandBus.execute.mockResolvedValueOnce(
+      success({ access_token: "at", refresh_token: "rt" }),
+    )
 
     const result = await handler.execute(new VerifyTotpLoginCommand("pending-tok", "ABCDE12345"))
 
@@ -131,7 +142,11 @@ describe("VerifyTotpLoginHandler", () => {
 
   it("returns failure when TOTP and all recovery codes are wrong", async () => {
     mockJwtService.verify.mockReturnValue(makeValidPayload())
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: VALID_USER_ID, totp_secret: "SECRET", totp_enabled: true })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: VALID_USER_ID,
+      totp_secret: "SECRET",
+      totp_enabled: true,
+    })
     mockTotpService.verifyCode.mockReturnValue(false)
     mockPrismaRecovery.findMany.mockResolvedValueOnce([{ id: "rc-1", code_hash: "hash1" }])
     mockTotpService.verifyRecoveryCode.mockResolvedValueOnce(false)
@@ -147,7 +162,11 @@ describe("VerifyTotpLoginHandler", () => {
 
   it("returns failure when 2FA is not configured on the user", async () => {
     mockJwtService.verify.mockReturnValue(makeValidPayload())
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: VALID_USER_ID, totp_secret: null, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: VALID_USER_ID,
+      totp_secret: null,
+      totp_enabled: false,
+    })
 
     const result = await handler.execute(new VerifyTotpLoginCommand("pending-tok", "123456"))
 

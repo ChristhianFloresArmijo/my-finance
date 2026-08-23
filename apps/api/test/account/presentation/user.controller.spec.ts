@@ -4,7 +4,7 @@ import { UserController } from "@account/presentation/restful/user.controller"
 import { CreateUserCommand } from "@account/capabilities/commands"
 import { FindUserByIdQuery, ListUsersQuery } from "@account/capabilities/queries"
 import { NewUserSerializer } from "@account/presentation/dtos"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { success, failure } from "@shared/business/utils/error-handling"
 import { InternalServerErrorException } from "@nestjs/common"
 import { ValidationException } from "@shared/business/exceptions"

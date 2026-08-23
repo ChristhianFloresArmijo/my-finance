@@ -100,7 +100,7 @@ export class RoleController {
   @ApiResponse({ status: 400, description: "Invalid input data" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @UsePipes(new ValidationPipe())
   @Post()
   async create(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
@@ -123,7 +123,7 @@ export class RoleController {
   @ApiResponse({ status: 400, description: "Invalid input data" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @UsePipes(new ValidationPipe())
   @Put(":id")
   async update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<Role> {
@@ -145,7 +145,7 @@ export class RoleController {
   @ApiResponse({ status: 403, description: "Cannot delete system role" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @Delete(":id")
   async delete(@Param("id") id: string): Promise<{ message: string }> {
     const result = await this.commandBus.execute<DeleteRoleCommand, Result<boolean, HandlerError>>(
@@ -189,7 +189,7 @@ export class RoleController {
   @ApiResponse({ status: 409, description: "Permission already assigned to role" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @UsePipes(new ValidationPipe())
   @Post(":id/permissions")
   async assignPermission(
@@ -221,7 +221,7 @@ export class RoleController {
   @ApiResponse({ status: 404, description: "Role, permission, or assignment not found" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireRole('superadmin')
+  @RequireRole("superadmin")
   @Delete(":id/permissions/:permissionId")
   async revokePermission(
     @Param("id") roleId: string,

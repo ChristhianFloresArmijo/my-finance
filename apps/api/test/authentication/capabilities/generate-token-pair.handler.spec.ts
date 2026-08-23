@@ -8,7 +8,7 @@ import { success, failure } from "@shared/business/utils/error-handling"
 import { createMockUser } from "../../helpers/mock-factories/user.factory"
 import { createMockRefreshToken } from "../../helpers/mock-factories/refresh-token.factory"
 import { ConflictException } from "@nestjs/common"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 
 /**
  * GenerateTokenPairHandler Unit Tests

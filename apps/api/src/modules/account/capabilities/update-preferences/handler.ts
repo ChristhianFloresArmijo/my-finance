@@ -12,18 +12,20 @@ export class UpdatePreferencesHandler implements ICommandHandler<
 > {
   constructor(private readonly preferencesRepository: IUserPreferencesRepository) {}
 
-  async execute(command: UpdatePreferencesCommand): Promise<Result<CurrentUserPreferencesDto, HandlerError>> {
+  async execute(
+    command: UpdatePreferencesCommand,
+  ): Promise<Result<CurrentUserPreferencesDto, HandlerError>> {
     const result = await this.preferencesRepository.upsert(command.userId, command.dto)
     if (!result.isOk) return failure(new InternalServerErrorException(result.error))
 
     const p = result.value
     return success({
-      theme:        p.theme,
-      language:     p.language,
-      timezone:     p.timezone,
+      theme: p.theme,
+      language: p.language,
+      timezone: p.timezone,
       notify_email: p.notify_email,
-      notify_push:  p.notify_push,
-      notify_sms:   p.notify_sms,
+      notify_push: p.notify_push,
+      notify_sms: p.notify_sms,
     })
   }
 }

@@ -1,4 +1,4 @@
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import { Permission } from "@authorization/business/entities/permission.entity"
 import { createMockPermissionData } from "../../../helpers/mock-factories"
 

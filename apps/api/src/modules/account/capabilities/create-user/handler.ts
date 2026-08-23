@@ -2,7 +2,11 @@ import { CommandHandler, ICommandHandler, EventBus } from "@nestjs/cqrs"
 import { InternalServerErrorException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { v4 as uuidv4 } from "uuid"
-import { IUserRepository, IUserProfileRepository, IUserPreferencesRepository } from "@account/business/repositories"
+import {
+  IUserRepository,
+  IUserProfileRepository,
+  IUserPreferencesRepository,
+} from "@account/business/repositories"
 import { IRoleRepository } from "@authorization/business/repositories"
 import { MailService } from "@shared/integration/mail/MailService"
 import { User } from "@account/business/entities"
@@ -92,7 +96,10 @@ export class CreateUserHandler implements ICommandHandler<
 
       const assignResult = await this.roleRepository.assignRoleToUser(userRoleResult.value)
       if (!assignResult.isOk) {
-        console.warn(`Failed to assign role ${roleId} to user ${createdUser.id}:`, assignResult.error)
+        console.warn(
+          `Failed to assign role ${roleId} to user ${createdUser.id}:`,
+          assignResult.error,
+        )
       }
     }
 
@@ -105,19 +112,27 @@ export class CreateUserHandler implements ICommandHandler<
       this.mailService
         .sendWelcomeWithCredentials(createdUser.email, fullName, plaintextPassword, loginUrl)
         .catch((err) => {
-          console.warn(`[CreateUser] Failed to send credentials email to ${createdUser.email}:`, err)
+          console.warn(
+            `[CreateUser] Failed to send credentials email to ${createdUser.email}:`,
+            err,
+          )
         })
     } else {
       // 7. Generate email verification token (24h) and send verification email (best-effort)
       const verifyToken = uuidv4()
       const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-      await this.repository.storeVerificationToken(createdUser.id, verifyToken, verifyExpiresAt).catch(() => {})
+      await this.repository
+        .storeVerificationToken(createdUser.id, verifyToken, verifyExpiresAt)
+        .catch(() => {})
 
       const verifyUrl = `${appUrl}/auth/verify-email?token=${verifyToken}`
 
       this.mailService.sendEmailVerification(command.data.email, verifyUrl).catch((err) => {
-        console.warn(`[CreateUser] Failed to send verification email to ${command.data.email}:`, err)
+        console.warn(
+          `[CreateUser] Failed to send verification email to ${command.data.email}:`,
+          err,
+        )
       })
     }
 

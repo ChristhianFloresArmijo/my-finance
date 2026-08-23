@@ -65,7 +65,12 @@ describe("GetCurrentUserHandler", () => {
   })
 
   it("should return user with all properties", async () => {
-    const mockDto = createMockCurrentUserDto({ id: "user-123", first_name: "John", last_name: "Doe", email: "john@example.com" })
+    const mockDto = createMockCurrentUserDto({
+      id: "user-123",
+      first_name: "John",
+      last_name: "Doe",
+      email: "john@example.com",
+    })
     mockUserRepo.findCurrent.mockResolvedValueOnce(success(mockDto))
 
     const result = await handler.execute(new GetCurrentUserQuery("user-123"))

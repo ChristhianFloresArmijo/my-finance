@@ -1,4 +1,4 @@
-import { RefreshToken as PrismaRefreshToken, Status } from '@database/prisma/generated-client'
+import { RefreshToken as PrismaRefreshToken, Status } from "@database/prisma/generated-client"
 import { ensureIsValidEntity, makeSchemaOptional } from "@shared/business/entities/validate-entity"
 import { CommonTimeStamps, MakePartial } from "@shared/business/types"
 import { ErrorCollection, failure, Result, success } from "@shared/business/utils/error-handling"
@@ -9,25 +9,25 @@ type PartialFields = "expires_at" | keyof CommonTimeStamps
 
 export class RefreshToken implements PrismaRefreshToken {
   private static readonly rules = {
-    id:         v.string(),
-    token:      v.string(),
+    id: v.string(),
+    token: v.string(),
     expires_at: v.nullish(v.date()),
-    user_id:    v.string(),
+    user_id: v.string(),
     created_at: v.nullish(v.date()),
     updated_at: v.nullish(v.date()),
     deleted_at: v.nullish(v.date()),
-    status:     v.enum(Status, "Invalid status"),
+    status: v.enum(Status, "Invalid status"),
   }
 
   private constructor(
-    public id:         string,
-    public token:      string,
+    public id: string,
+    public token: string,
     public expires_at: Date,
-    public user_id:    string,
+    public user_id: string,
     public created_at: Date,
     public updated_at: Date | null,
     public deleted_at: Date | null,
-    public status:     Status,
+    public status: Status,
   ) {}
 
   public static instance(
@@ -68,8 +68,14 @@ export class RefreshToken implements PrismaRefreshToken {
     data: MakePartial<RefreshToken, PartialFields>,
   ): Result<true, ErrorCollection> {
     const rules = makeSchemaOptional(RefreshToken.rules, [
-      "id", "token", "expires_at", "user_id",
-      "created_at", "updated_at", "deleted_at", "status",
+      "id",
+      "token",
+      "expires_at",
+      "user_id",
+      "created_at",
+      "updated_at",
+      "deleted_at",
+      "status",
     ])
     const validationResult = ensureIsValidEntity(v.object(rules), data)
     if (validationResult.isOk === false) return validationResult

@@ -1,5 +1,5 @@
 import { RefreshToken } from "@auth/business/entities/refresh-token.entity"
-import { Status } from '@database/prisma/generated-client'
+import { Status } from "@database/prisma/generated-client"
 import {
   createMockRefreshToken,
   createExpiredRefreshToken,

@@ -26,7 +26,7 @@ export class RevokeSessionHandler implements ICommandHandler<
 
       await this.client.refreshToken.update({
         where: { id: command.tokenId },
-        data:  { status: Status.INACTIVE },
+        data: { status: Status.INACTIVE },
       })
 
       return success(true)

@@ -1,4 +1,4 @@
-import { Prisma } from '@database/prisma/generated-client'
+import { Prisma } from "@database/prisma/generated-client"
 
 type PrismaMatchTypes = keyof Prisma.StringFilter
 

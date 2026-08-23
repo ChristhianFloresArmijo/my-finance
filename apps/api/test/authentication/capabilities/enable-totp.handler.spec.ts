@@ -16,7 +16,10 @@ describe("EnableTotpHandler", () => {
 
   beforeEach(async () => {
     mockPrismaUser = { findUnique: jest.fn(), update: jest.fn().mockResolvedValue({}) }
-    mockPrismaRecovery = { deleteMany: jest.fn().mockResolvedValue({}), createMany: jest.fn().mockResolvedValue({}) }
+    mockPrismaRecovery = {
+      deleteMany: jest.fn().mockResolvedValue({}),
+      createMany: jest.fn().mockResolvedValue({}),
+    }
     mockTotpService = {
       verifyCode: jest.fn(),
       generateRecoveryCodes: jest.fn().mockReturnValue(["CODE1", "CODE2", "CODE3"]),
@@ -29,7 +32,10 @@ describe("EnableTotpHandler", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EnableTotpHandler,
-        { provide: PrismaService, useValue: { user: mockPrismaUser, userRecoveryCode: mockPrismaRecovery } },
+        {
+          provide: PrismaService,
+          useValue: { user: mockPrismaUser, userRecoveryCode: mockPrismaRecovery },
+        },
         { provide: TotpService, useValue: mockTotpService },
       ],
     }).compile()
@@ -42,7 +48,11 @@ describe("EnableTotpHandler", () => {
   // ─── Happy path ───────────────────────────────────────────────────────────
 
   it("enables 2FA and returns recovery codes for valid code", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: false,
+    })
     mockTotpService.verifyCode.mockReturnValue(true)
 
     const result = await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
@@ -54,7 +64,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("sets totp_enabled=true and totp_enabled_at in DB", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: false,
+    })
     mockTotpService.verifyCode.mockReturnValue(true)
 
     await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
@@ -68,7 +82,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("clears old recovery codes before creating new ones", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: false,
+    })
     mockTotpService.verifyCode.mockReturnValue(true)
 
     await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
@@ -78,7 +96,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("hashes recovery codes before storing them", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: false,
+    })
     mockTotpService.verifyCode.mockReturnValue(true)
 
     await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
@@ -106,7 +128,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("returns failure when 2FA is already enabled", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: true })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: true,
+    })
 
     const result = await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
 
@@ -116,7 +142,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("returns failure when setup has not been called yet (no totp_secret)", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: null, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: null,
+      totp_enabled: false,
+    })
 
     const result = await handler.execute(new EnableTotpCommand(USER_ID, "123456"))
 
@@ -128,7 +158,11 @@ describe("EnableTotpHandler", () => {
   })
 
   it("returns failure when verification code is incorrect", async () => {
-    mockPrismaUser.findUnique.mockResolvedValueOnce({ id: USER_ID, totp_secret: TOTP_SECRET, totp_enabled: false })
+    mockPrismaUser.findUnique.mockResolvedValueOnce({
+      id: USER_ID,
+      totp_secret: TOTP_SECRET,
+      totp_enabled: false,
+    })
     mockTotpService.verifyCode.mockReturnValue(false)
 
     const result = await handler.execute(new EnableTotpCommand(USER_ID, "000000"))

@@ -1,23 +1,58 @@
 import { Public, CurrentUser } from "@auth/presentation/decorators"
 import {
-  Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards, UsePipes, ValidationPipe,
-  UnauthorizedException, HttpCode,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+  UnauthorizedException,
+  HttpCode,
 } from "@nestjs/common"
 import { CommandBus, QueryBus } from "@nestjs/cqrs"
-import { ApiBody, ApiTags, ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse } from "@nestjs/swagger"
+import {
+  ApiBody,
+  ApiTags,
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiResponse,
+} from "@nestjs/swagger"
 import { SkipThrottle, Throttle } from "@nestjs/throttler"
 import { LocalAuthGuard, JwtAuthGuard } from "@auth/capabilities/guards"
 import {
-  SignInDto, SignUpDto, CurrentUserDto,
-  VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, RefreshTokenDto,
-  TotpCodeDto, TotpVerifyLoginDto, TotpSetupResponseDto, TotpEnableResponseDto, TotpStatusDto,
+  SignInDto,
+  SignUpDto,
+  CurrentUserDto,
+  VerifyEmailDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  RefreshTokenDto,
+  TotpCodeDto,
+  TotpVerifyLoginDto,
+  TotpSetupResponseDto,
+  TotpEnableResponseDto,
+  TotpStatusDto,
 } from "@auth/presentation/dtos"
 import {
-  SignInCommand, GenerateTokenPairCommand, SignOutCommand,
-  VerifyEmailCommand, ForgotPasswordCommand, ResetPasswordCommand,
-  RevokeSessionCommand, RevokeAllSessionsCommand,
-  SetupTotpCommand, EnableTotpCommand, DisableTotpCommand,
-  VerifyTotpLoginCommand, RegenerateRecoveryCodesCommand,
+  SignInCommand,
+  GenerateTokenPairCommand,
+  SignOutCommand,
+  VerifyEmailCommand,
+  ForgotPasswordCommand,
+  ResetPasswordCommand,
+  RevokeSessionCommand,
+  RevokeAllSessionsCommand,
+  SetupTotpCommand,
+  EnableTotpCommand,
+  DisableTotpCommand,
+  VerifyTotpLoginCommand,
+  RegenerateRecoveryCodesCommand,
 } from "@auth/capabilities/commands"
 import { GetCurrentUserQuery, ListUserSessionsQuery } from "@auth/capabilities/queries"
 import { CreateUserCommand } from "@account/capabilities/commands"
@@ -42,17 +77,28 @@ export class AuthenticationController {
   private setCookies(res: Response, accessToken: string, refreshToken: string) {
     const isProduction = this.configService.get("nodeEnv") === "production"
     const cookieSecure = this.configService.get<boolean>("cookieSecure") ?? isProduction
-    const cookieSameSite = (this.configService.get<string>("cookieSameSite") || "lax") as "strict" | "lax" | "none"
+    const cookieSameSite = (this.configService.get<string>("cookieSameSite") || "lax") as
+      | "strict"
+      | "lax"
+      | "none"
     const cookieDomain = this.configService.get<string>("cookieDomain") || undefined
     const domainOpt = cookieDomain ? { domain: cookieDomain } : {}
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: true, secure: cookieSecure, sameSite: cookieSameSite, ...domainOpt,
-      maxAge: 15 * 60 * 1000, path: "/",
+      httpOnly: true,
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
+      ...domainOpt,
+      maxAge: 15 * 60 * 1000,
+      path: "/",
     })
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true, secure: cookieSecure, sameSite: cookieSameSite, ...domainOpt,
-      maxAge: 60 * 24 * 60 * 60 * 1000, path: "/",
+      httpOnly: true,
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
+      ...domainOpt,
+      maxAge: 60 * 24 * 60 * 60 * 1000,
+      path: "/",
     })
   }
 
@@ -64,7 +110,10 @@ export class AuthenticationController {
   }
 
   // ─── POST /auth/sign-up ─────────────────────────────────────────────────────
-  @ApiOperation({ summary: "Sign up", description: "Create account, set cookies, return full user DTO." })
+  @ApiOperation({
+    summary: "Sign up",
+    description: "Create account, set cookies, return full user DTO.",
+  })
   @ApiBody({ type: SignUpDto })
   @ApiResponse({ status: 201, type: CurrentUserDto })
   @Throttle({ strict: { limit: 3, ttl: 60_000 } })
@@ -90,16 +139,12 @@ export class AuthenticationController {
     if (!createResult.isOk) throw createResult.error
 
     // 2. Sign in to generate tokens
-    const signInResult = await this.commandBus.execute(
-      new SignInCommand(dto.email, dto.password),
-    )
+    const signInResult = await this.commandBus.execute(new SignInCommand(dto.email, dto.password))
     if (!signInResult.isOk) throw signInResult.error
     this.setCookies(res, signInResult.value.access_token, signInResult.value.refresh_token)
 
     // 3. Return enriched DTO (roles + permissions in one query)
-    const meResult = await this.queryBus.execute(
-      new GetCurrentUserQuery(createResult.value.id),
-    )
+    const meResult = await this.queryBus.execute(new GetCurrentUserQuery(createResult.value.id))
     if (!meResult.isOk) throw meResult.error
     return meResult.value
   }
@@ -108,7 +153,10 @@ export class AuthenticationController {
   @ApiOperation({ summary: "Sign in" })
   @ApiBody({ type: SignInDto })
   @ApiCookieAuth()
-  @ApiResponse({ status: 200, description: "Signed in — cookies set, OR requires_2fa: true with pending token" })
+  @ApiResponse({
+    status: 200,
+    description: "Signed in — cookies set, OR requires_2fa: true with pending token",
+  })
   @ApiResponse({ status: 401, description: "Invalid credentials" })
   @Throttle({ auth: { limit: 5, ttl: 60_000 } })
   @Public()
@@ -142,7 +190,8 @@ export class AuthenticationController {
     })
 
     const userResult = await this.queryBus.execute(new FindUserByIdQuery(payload.sub))
-    if (!userResult.isOk || !userResult.value) throw new UnauthorizedException("Invalid refresh token")
+    if (!userResult.isOk || !userResult.value)
+      throw new UnauthorizedException("Invalid refresh token")
 
     const result = await this.commandBus.execute(
       new GenerateTokenPairCommand(userResult.value, refreshToken),

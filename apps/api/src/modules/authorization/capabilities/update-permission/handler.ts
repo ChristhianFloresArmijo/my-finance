@@ -8,7 +8,10 @@ import { failure, HandlerError, Result, success } from "@shared/business/utils/e
 import { AuditableCommandHandler } from "@shared/capabilities/handlers"
 
 @CommandHandler(UpdatePermissionCommand)
-export class UpdatePermissionHandler extends AuditableCommandHandler<UpdatePermissionCommand, Permission> {
+export class UpdatePermissionHandler extends AuditableCommandHandler<
+  UpdatePermissionCommand,
+  Permission
+> {
   constructor(
     private readonly repository: IPermissionRepository,
     eventBus: EventBus,
@@ -16,14 +19,22 @@ export class UpdatePermissionHandler extends AuditableCommandHandler<UpdatePermi
     super(eventBus)
   }
 
-  protected getAction() { return "update-permission" }
-  protected getEntityType() { return "Permission" }
-  protected getEntityId(command: UpdatePermissionCommand) { return command.id }
+  protected getAction() {
+    return "update-permission"
+  }
+  protected getEntityType() {
+    return "Permission"
+  }
+  protected getEntityId(command: UpdatePermissionCommand) {
+    return command.id
+  }
   protected getSafePayload(command: UpdatePermissionCommand) {
     return { id: command.id, ...command.data }
   }
 
-  protected async executeCommand(command: UpdatePermissionCommand): Promise<Result<Permission, HandlerError>> {
+  protected async executeCommand(
+    command: UpdatePermissionCommand,
+  ): Promise<Result<Permission, HandlerError>> {
     const existingPermissionResult = await this.repository.findById(command.id)
 
     if (!existingPermissionResult.isOk) {
@@ -37,7 +48,10 @@ export class UpdatePermissionHandler extends AuditableCommandHandler<UpdatePermi
 
     const permissionResult = Permission.instance({
       ...existingPermission,
-      description: command.data.description !== undefined ? command.data.description : existingPermission.description,
+      description:
+        command.data.description !== undefined
+          ? command.data.description
+          : existingPermission.description,
       status: command.data.status ?? existingPermission.status,
       is_system: command.data.is_system ?? existingPermission.is_system,
     })

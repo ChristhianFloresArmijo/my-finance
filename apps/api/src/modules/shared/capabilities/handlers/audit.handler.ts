@@ -25,7 +25,10 @@ export class AuditHandler implements IEventHandler<AuditEvent> {
       })
 
       if (!entityResult.isOk) {
-        this.logger.warn(`Audit entity build failed for action "${event.action}"`, entityResult.error)
+        this.logger.warn(
+          `Audit entity build failed for action "${event.action}"`,
+          entityResult.error,
+        )
         return
       }
 

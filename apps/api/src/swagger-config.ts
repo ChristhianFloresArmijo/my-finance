@@ -16,19 +16,22 @@ export class SwaggerConfig {
     // Scalar API reference — disabled in production to avoid exposing full API surface
     if (nodeEnv !== "production") {
       // Relax CSP for /reference only — Scalar loads assets from its CDN
-      app.use("/reference", helmet({
-        contentSecurityPolicy: {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'"],
-            workerSrc: ["'self'", "blob:"],
+      app.use(
+        "/reference",
+        helmet({
+          contentSecurityPolicy: {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+              styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+              fontSrc: ["'self'", "https://fonts.gstatic.com"],
+              imgSrc: ["'self'", "data:", "https:"],
+              connectSrc: ["'self'"],
+              workerSrc: ["'self'", "blob:"],
+            },
           },
-        },
-      }))
+        }),
+      )
 
       app.use(
         "/reference",

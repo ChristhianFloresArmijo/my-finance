@@ -1,4 +1,8 @@
-import { Permission as PrismaPermission, PermissionScope, Status } from '@database/prisma/generated-client'
+import {
+  Permission as PrismaPermission,
+  PermissionScope,
+  Status,
+} from "@database/prisma/generated-client"
 import { CommonTimeStamps, MakePartial } from "@shared/business/types"
 import { ensureIsValidEntity } from "@shared/business/entities/validate-entity"
 import { ErrorCollection, failure, Result, success } from "@shared/business/utils/error-handling"
@@ -11,8 +15,14 @@ type PartialFields = "id" | "scope" | keyof CommonTimeStamps
 export class Permission implements PrismaPermission {
   private static readonly rules = {
     id: v.optional(v.string()),
-    resource: v.pipe(v.string(), v.regex(/^[a-z][a-z0-9_-]*$/, "resource must be a lowercase slug (e.g. 'user', 'blog-post')")),
-    action: v.pipe(v.string(), v.regex(/^[a-z][a-z0-9_-]*$/, "action must be a lowercase slug (e.g. 'read', 'create')")),
+    resource: v.pipe(
+      v.string(),
+      v.regex(/^[a-z][a-z0-9_-]*$/, "resource must be a lowercase slug (e.g. 'user', 'blog-post')"),
+    ),
+    action: v.pipe(
+      v.string(),
+      v.regex(/^[a-z][a-z0-9_-]*$/, "action must be a lowercase slug (e.g. 'read', 'create')"),
+    ),
     scope: v.optional(v.enum(PermissionScope, "scope must be ALL | OWN | TEAM | ORG")),
     description: v.nullish(v.string()),
     is_system: v.boolean(),

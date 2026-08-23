@@ -35,7 +35,11 @@ export class UserPermissionController {
   ) {}
 
   @ApiOperation({ summary: "Grant a permission directly to a user (bypasses roles)" })
-  @ApiResponse({ status: 201, description: "Permission assigned successfully", type: UserPermission })
+  @ApiResponse({
+    status: 201,
+    description: "Permission assigned successfully",
+    type: UserPermission,
+  })
   @ApiResponse({ status: 404, description: "User or permission not found" })
   @ApiResponse({ status: 409, description: "Permission already assigned to user" })
   @UseInterceptors(ClassSerializerInterceptor)
@@ -58,7 +62,11 @@ export class UserPermissionController {
   @ApiOperation({ summary: "Revoke a direct permission from a user" })
   @ApiParam({ name: "userId", description: "User ID" })
   @ApiParam({ name: "permissionId", description: "Permission ID" })
-  @ApiResponse({ status: 200, description: "Permission revoked successfully", type: UserPermission })
+  @ApiResponse({
+    status: 200,
+    description: "Permission revoked successfully",
+    type: UserPermission,
+  })
   @ApiResponse({ status: 404, description: "User or assignment not found" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
@@ -78,14 +86,16 @@ export class UserPermissionController {
 
   @ApiOperation({ summary: "Get all direct permissions for a user" })
   @ApiParam({ name: "userId", description: "User ID" })
-  @ApiResponse({ status: 200, description: "Direct permissions retrieved successfully", type: [UserPermission] })
+  @ApiResponse({
+    status: 200,
+    description: "Direct permissions retrieved successfully",
+    type: [UserPermission],
+  })
   @ApiResponse({ status: 404, description: "User not found" })
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get(":userId/permissions")
-  async getUserDirectPermissions(
-    @Param("userId") userId: string,
-  ): Promise<UserPermission[]> {
+  async getUserDirectPermissions(@Param("userId") userId: string): Promise<UserPermission[]> {
     const result = await this.queryBus.execute<
       GetUserDirectPermissionsQuery,
       Result<UserPermission[], HandlerError>

@@ -30,12 +30,14 @@ export class ListUserSessionsHandler implements IQueryHandler<
         },
       })
 
-      return success(tokens.map((t) => ({
-        id:         t.id,
-        user:       t.user,
-        created_at: t.created_at,
-        expires_at: t.expires_at,
-      })))
+      return success(
+        tokens.map((t) => ({
+          id: t.id,
+          user: t.user,
+          created_at: t.created_at,
+          expires_at: t.expires_at,
+        })),
+      )
     } catch (error) {
       return failure(new InternalServerErrorException(error))
     }

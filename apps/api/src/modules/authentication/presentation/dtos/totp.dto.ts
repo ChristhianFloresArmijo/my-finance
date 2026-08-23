@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsString, Length } from "class-validator"
+import { IsNotEmpty, IsString } from "class-validator"
 
 export class TotpCodeDto {
   @ApiProperty({ description: "6-digit TOTP code or 10-char recovery code", example: "123456" })
@@ -9,7 +9,9 @@ export class TotpCodeDto {
 }
 
 export class TotpVerifyLoginDto {
-  @ApiProperty({ description: "Short-lived pending token returned by sign-in when 2FA is required" })
+  @ApiProperty({
+    description: "Short-lived pending token returned by sign-in when 2FA is required",
+  })
   @IsNotEmpty()
   @IsString()
   pending_token: string
@@ -26,7 +28,10 @@ export class TotpSetupResponseDto {
 }
 
 export class TotpEnableResponseDto {
-  @ApiProperty({ description: "One-time recovery codes — show once and never again", type: [String] })
+  @ApiProperty({
+    description: "One-time recovery codes — show once and never again",
+    type: [String],
+  })
   recovery_codes: string[]
 }
 

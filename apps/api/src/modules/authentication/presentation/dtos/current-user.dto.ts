@@ -45,6 +45,8 @@ export class CurrentUserDto {
   @ApiProperty() created_at: Date
   @ApiProperty({ type: [CurrentUserRoleDto] }) roles: CurrentUserRoleDto[]
   @ApiProperty({ type: [CurrentUserPermissionDto] }) permissions: CurrentUserPermissionDto[]
-  @ApiProperty({ type: CurrentUserProfileDto, nullable: true }) profile: CurrentUserProfileDto | null
-  @ApiProperty({ type: CurrentUserPreferencesDto, nullable: true }) preferences: CurrentUserPreferencesDto | null
+  @ApiProperty({ type: CurrentUserProfileDto, nullable: true })
+  profile: CurrentUserProfileDto | null
+  @ApiProperty({ type: CurrentUserPreferencesDto, nullable: true })
+  preferences: CurrentUserPreferencesDto | null
 }

@@ -10,7 +10,10 @@ export interface EnableTotpResult {
 }
 
 @CommandHandler(EnableTotpCommand)
-export class EnableTotpHandler implements ICommandHandler<EnableTotpCommand, Result<EnableTotpResult, HandlerError>> {
+export class EnableTotpHandler implements ICommandHandler<
+  EnableTotpCommand,
+  Result<EnableTotpResult, HandlerError>
+> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly totpService: TotpService,
@@ -40,10 +43,10 @@ export class EnableTotpHandler implements ICommandHandler<EnableTotpCommand, Res
     await this.prisma.userRecoveryCode.deleteMany({ where: { user_id: command.userId } })
 
     const plainCodes = this.totpService.generateRecoveryCodes()
-    const hashed = await Promise.all(plainCodes.map(c => this.totpService.hashRecoveryCode(c)))
+    const hashed = await Promise.all(plainCodes.map((c) => this.totpService.hashRecoveryCode(c)))
 
     await this.prisma.userRecoveryCode.createMany({
-      data: hashed.map(code_hash => ({ user_id: command.userId, code_hash })),
+      data: hashed.map((code_hash) => ({ user_id: command.userId, code_hash })),
     })
 
     return success({ recovery_codes: plainCodes })
