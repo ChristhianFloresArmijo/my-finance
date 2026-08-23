@@ -1,18 +1,18 @@
-import js from '@eslint/js';
-import pluginVue from 'eslint-plugin-vue';
-import tseslint from 'typescript-eslint';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import js from "@eslint/js";
+import pluginVue from "eslint-plugin-vue";
+import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
 
-export default tseslint.defineConfig(
+export default tseslint.config(
   js.configs.recommended,
   tseslint.configs.recommended,
-  pluginVue.configs['flat/recommended'],
+  pluginVue.configs["flat/recommended"],
   {
-    files: ['**/*.vue'],
+    files: ["**/*.vue"],
     languageOptions: {
       parserOptions: {
         parser: tseslint.parser,
-        extraFileExtensions: ['.vue'],
+        extraFileExtensions: [".vue"],
         tsconfigRootDir: import.meta.dirname,
         projectService: true,
       },
@@ -20,13 +20,13 @@ export default tseslint.defineConfig(
   },
   {
     ignores: [
-      'dist/**',
-      'node_modules/**',
-      '**/node_modules/**',
-      'coverage/**',
-      '*.min.js',
-      'pnpm-lock.yaml',
+      "dist/**",
+      "node_modules/**",
+      "**/node_modules/**",
+      "coverage/**",
+      "*.min.js",
+      "pnpm-lock.yaml",
     ],
   },
-  eslintConfigPrettier
+  eslintConfigPrettier,
 );

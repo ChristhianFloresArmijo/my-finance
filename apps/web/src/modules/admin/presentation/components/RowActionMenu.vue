@@ -1,8 +1,8 @@
 <template>
   <div ref="root">
     <button
-      @click.stop="toggle"
       class="p-1.5 rounded text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      @click.stop="toggle"
     >
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
         <circle cx="12" cy="5" r="2"/>
@@ -24,12 +24,12 @@
           <div v-if="item.divider" class="my-1 border-t border-gray-100 dark:border-gray-700"/>
           <button
             v-else
-            @click.stop="run(item)"
             :disabled="item.disabled"
             class="w-full text-left px-3 py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             :class="item.danger
               ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+            @click.stop="run(item)"
           >
             {{ item.label }}
           </button>
