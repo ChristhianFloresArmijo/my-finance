@@ -23,7 +23,7 @@ npm-debug.log*
 Thumbs.db
 
 # IDE
-.vscode/
+apps/*/.vscode/
 .idea/
 
 # Test coverage
