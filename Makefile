@@ -4,7 +4,7 @@ start:
 	docker compose up -d
 
 api:
-	docker compose exec app bash
+	docker compose exec api bash
 
 web:
-	docker compose exec app bash
+	docker compose exec web bash

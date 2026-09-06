@@ -1,5 +1,5 @@
 services:
-  app:
+  api:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -45,8 +45,8 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     ports:
-      - "1025:1025"  # SMTP (app sends here)
-      - "8025:8025"  # Web UI — http://localhost:8025
+      - "1025:1025" # SMTP (app s sends here)
+      - "8025:8025" # Web UI — http://localhost:8025
 
 volumes:
   pgdata:
