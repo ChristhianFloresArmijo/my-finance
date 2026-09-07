@@ -31,6 +31,8 @@
     "prisma:reset": "prisma migrate reset --schema=./src/database/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./src/database/prisma/schema.prisma",
     "prisma:seed": "ts-node -r tsconfig-paths/register src/database/prisma/seed.ts",
+    "prisma:format": "prisma format --schema=./src/database/prisma/schema.prisma",
+    "prisma:validate": "prisma validate --schema=./src/database/prisma/schema.prisma",
     "postinstall": "prisma generate --schema=./src/database/prisma/schema.prisma"
   },
   "dependencies": {

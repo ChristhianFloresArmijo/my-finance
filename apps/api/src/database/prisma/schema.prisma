@@ -21,12 +21,16 @@ enum Status {
   DELETED
 }
 
-enum PermissionScope {
-  ALL  // Applies to all records (default)
-  OWN  // Restricted to the user's own records
-  TEAM // Restricted to the user's team/group records
-  ORG  // Restricted to the user's organization records
+enum RecurrenceFrequency {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
 }
+
+// ============================================================================
+// ACCOUNTS
+// ============================================================================
 
 model User {
   id String @id @default(uuid())
@@ -130,6 +134,13 @@ model RefreshToken {
 // ============================================================================
 // RBAC MODELS
 // ============================================================================
+
+enum PermissionScope {
+  ALL  // Applies to all records (default)
+  OWN  // Restricted to the user's own records
+  TEAM // Restricted to the user's team/group records
+  ORG  // Restricted to the user's organization records
+}
 
 model Role {
   id String @id @default(uuid())
@@ -250,4 +261,798 @@ model RolePermission {
   // A role can only have one instance of a specific permission
   @@unique([role_id, permission_id])
   @@map("role_permissions")
+}
+
+// ============================================================================
+// CATEGORIZATION & TAGGING
+// ============================================================================
+
+enum CategoryKind {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id        String       @id @default(uuid())
+  user_id   String?      // null = categoría del sistema (seed), no editable/borrable por el usuario
+  parent_id String?      // solo un nivel de anidación: categoría → subcategoría
+  name      String
+  kind      CategoryKind
+  icon      String?
+  color     String?
+  is_system Boolean      @default(false)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  parent   Category?  @relation("CategoryTree", fields: [parent_id], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  @@map("categories")
+}
+
+model Tag {
+  id      String @id @default(uuid())
+  user_id String
+  name    String
+  color   String?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  transaction_tags TransactionTag[]
+
+  @@unique([user_id, name])
+  @@map("tags")
+}
+
+model TransactionTag {
+  transaction_id String
+  tag_id         String
+
+  transaction Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([transaction_id, tag_id])
+  @@map("transaction_tags")
+}
+
+// ============================================================================
+// DOCUMENTS
+// ============================================================================
+
+enum DocumentEntityType {
+  TRANSACTION
+  DEBT
+  ASSET
+  TAX_OBLIGATION
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  user_id        String
+  file_reference String   // clave de almacenamiento — reutiliza IStorageProvider ya existente
+  file_name      String
+  mime_type      String
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  attachments DocumentAttachment[]
+
+  @@map("documents")
+}
+
+model DocumentAttachment {
+  id          String             @id @default(uuid())
+  document_id String
+  entity_type DocumentEntityType
+  entity_id   String
+
+  document Document @relation(fields: [document_id], references: [id], onDelete: Cascade)
+
+  @@map("document_attachments")
+}
+
+
+// ============================================================================
+// TRANSACTIONS
+// ============================================================================
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+  ADJUSTMENT
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  user_id     String
+  account_id  String
+  category_id String?
+  type        TransactionType
+  amount      Decimal         @db.Decimal(18, 4)   // siempre positivo — ver regla de negocio
+  currency_code String        @db.Char(3)
+  description String?
+  merchant    String?
+  date        DateTime
+  location    String?
+  notes       String?
+
+  // Solo para type = TRANSFER
+  transfer_account_id String?   // cuenta destino
+  transfer_group_id   String?   // agrupa las dos filas (origen/destino) de una misma transferencia
+  exchange_rate       Decimal?  @db.Decimal(18, 8)  // si origen y destino tienen distinta moneda
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  account  FinancialAccount @relation(fields: [account_id], references: [id])
+  category Category?        @relation(fields: [category_id], references: [id])
+  tags     TransactionTag[]
+  documents Document[]
+
+  @@map("transactions")
+}
+
+// ============================================================================
+// FINANCIAL ACCOUNTS
+// ============================================================================
+
+enum AccountType {
+  BANK
+  CASH
+  CREDIT_CARD
+  INVESTMENT
+  SAVINGS
+  CRYPTO
+  LOAN
+}
+
+model FinancialAccount {
+  id            String      @id @default(uuid())
+  user_id       String
+  name          String
+  type          AccountType
+  institution   String?
+  currency_code String      @db.Char(3)   // ISO 4217
+  balance       Decimal     @db.Decimal(18, 4) @default(0)  // ver "Balance" abajo
+  credit_limit  Decimal?    @db.Decimal(18, 4)              // solo CREDIT_CARD
+  statement_day Int?                                         // día de corte, solo CREDIT_CARD
+  color         String?
+  icon          String?
+  is_archived   Boolean     @default(false)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("financial_accounts")
+}
+
+// ============================================================================
+// BUDGETS
+// ============================================================================
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model Budget {
+  id       String       @id @default(uuid())
+  user_id  String
+  name     String?
+
+  // Exactamente uno de los tres debe estar presente (validado en el entity factory)
+  category_id String?
+  account_id  String?
+  tag_id      String?
+
+  period        BudgetPeriod
+  amount        Decimal      @db.Decimal(18, 4)
+  currency_code String       @db.Char(3)
+  start_date    DateTime      // ancla para calcular el periodo vigente
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
+
+  category Category?        @relation(fields: [category_id], references: [id])
+  account  FinancialAccount? @relation(fields: [account_id], references: [id])
+  tag      Tag?              @relation(fields: [tag_id], references: [id])
+
+  @@map("budgets")
+}
+
+// ============================================================================
+//  GOALS
+// ============================================================================
+
+enum GoalStatus {
+  IN_PROGRESS
+  ACHIEVED
+  ABANDONED
+}
+
+enum ContributionSource {
+  MANUAL
+  AUTOMATIC
+}
+
+model SavingsGoal {
+  id              String       @id @default(uuid())
+  user_id         String
+  name            String
+  target_amount   Decimal      @db.Decimal(18, 4)
+  currency_code   String       @db.Char(3)
+  target_date     DateTime?
+  linked_account_id String?    // cuenta donde físicamente se guarda el ahorro (opcional)
+
+  auto_contribution_amount    Decimal?             @db.Decimal(18, 4)
+  auto_contribution_frequency RecurrenceFrequency?
+
+  icon   String?
+  color  String?
+  status GoalStatus @default(IN_PROGRESS)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  linked_account FinancialAccount?   @relation(fields: [linked_account_id], references: [id])
+  contributions  GoalContribution[]
+
+  @@map("savings_goals")
+}
+
+model GoalContribution {
+  id             String              @id @default(uuid())
+  goal_id        String
+  amount         Decimal             @db.Decimal(18, 4)
+  date           DateTime
+  source         ContributionSource  @default(MANUAL)
+  transaction_id String?             // si el aporte proviene de una Transaction real
+  notes          String?
+
+  created_at DateTime @default(now())
+
+  goal        SavingsGoal  @relation(fields: [goal_id], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transaction_id], references: [id])
+
+  @@map("goal_contributions")
+}
+
+
+// ============================================================================
+// DEBTS
+// ============================================================================
+
+enum DebtType {
+  MORTGAGE
+  LOAN
+  CREDIT_CARD
+  FINANCING
+  PERSONAL_LOAN
+}
+
+enum InterestType {
+  FIXED
+  VARIABLE
+}
+
+enum DebtStatus {
+  ACTIVE
+  PAID_OFF
+  DEFAULTED
+}
+
+enum DebtPaymentType {
+  SCHEDULED
+  MINIMUM
+  EXTRA_PRINCIPAL
+}
+
+model Debt {
+  id                  String       @id @default(uuid())
+  user_id             String
+  financial_account_id String?    // opcional — ver 01-cuentas.md, decisión abierta
+  name                String
+  creditor            String
+  type                DebtType
+  interest_type       InterestType
+  interest_rate       Decimal      @db.Decimal(9, 6)  // tasa anual, %
+  initial_balance     Decimal      @db.Decimal(18, 4)
+  current_balance     Decimal      @db.Decimal(18, 4)
+  currency_code       String       @db.Char(3)
+  start_date          DateTime
+  due_date            DateTime?    // fecha de vencimiento / fin de plazo, si aplica
+  minimum_payment     Decimal      @db.Decimal(18, 4)
+  debt_status         DebtStatus   @default(ACTIVE)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  financial_account FinancialAccount? @relation(fields: [financial_account_id], references: [id])
+  payments          DebtPayment[]
+
+  @@map("debts")
+}
+
+model DebtPayment {
+  id               String          @id @default(uuid())
+  debt_id          String
+  date             DateTime
+  amount           Decimal         @db.Decimal(18, 4)
+  principal_amount Decimal         @db.Decimal(18, 4)
+  interest_amount  Decimal         @db.Decimal(18, 4)
+  payment_type     DebtPaymentType
+  transaction_id   String?         // si se pagó desde una cuenta rastreada
+  notes            String?
+
+  created_at DateTime @default(now())
+
+  debt        Debt         @relation(fields: [debt_id], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transaction_id], references: [id])
+
+  @@map("debt_payments")
+}
+
+// ============================================================================
+// INVESTMENTS
+// ============================================================================
+
+enum InvestmentType {
+  STOCK
+  ETF
+  FUND
+  BOND
+  CRYPTO
+  REAL_ESTATE
+}
+
+enum InvestmentTxType {
+  BUY
+  SELL
+  DIVIDEND
+}
+
+model Investment {
+  id            String         @id @default(uuid())
+  user_id       String
+  account_id    String?        // FinancialAccount de tipo INVESTMENT, opcional
+  type          InvestmentType
+  symbol        String?        // ticker, si aplica (acciones/ETF/cripto)
+  name          String
+  currency_code String         @db.Char(3)
+  current_price Decimal?       @db.Decimal(18, 8)   // actualización manual en MVP — ver decisiones
+  current_price_updated_at DateTime?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  account      FinancialAccount?       @relation(fields: [account_id], references: [id])
+  transactions InvestmentTransaction[]
+
+  @@map("investments")
+}
+
+model InvestmentTransaction {
+  id             String           @id @default(uuid())
+  investment_id  String
+  type           InvestmentTxType
+  quantity       Decimal?         @db.Decimal(28, 8)  // null para DIVIDEND
+  price_per_unit Decimal?         @db.Decimal(18, 8)  // null para DIVIDEND
+  amount         Decimal          @db.Decimal(18, 4)  // total, incluye DIVIDEND
+  fees           Decimal?         @db.Decimal(18, 4)
+  date           DateTime
+  notes          String?
+
+  created_at DateTime @default(now())
+
+  investment Investment @relation(fields: [investment_id], references: [id], onDelete: Cascade)
+
+  @@map("investment_transactions")
+}
+
+// ============================================================================
+// NET WORTH
+// ============================================================================
+
+enum AssetType {
+  REAL_ESTATE
+  VEHICLE
+  ELECTRONICS
+  BUSINESS
+  EQUIPMENT
+  OTHER
+}
+
+model Asset {
+  id                String    @id @default(uuid())
+  user_id           String
+  type              AssetType
+  name              String
+  purchase_value    Decimal   @db.Decimal(18, 4)
+  current_value     Decimal   @db.Decimal(18, 4)
+  purchase_date     DateTime
+  depreciation_rate Decimal?  @db.Decimal(9, 6)   // % anual, opcional
+  currency_code     String    @db.Char(3)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  @@map("assets")
+}
+
+model NetWorthSnapshot {
+  id                String   @id @default(uuid())
+  user_id           String
+  date              DateTime
+  total_assets      Decimal  @db.Decimal(18, 4)
+  total_liabilities Decimal  @db.Decimal(18, 4)
+  net_worth         Decimal  @db.Decimal(18, 4)
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, date])
+  @@map("net_worth_snapshots")
+}
+
+// ============================================================================
+// RECURRING PAYMENTS
+// ============================================================================
+
+model RecurringPayment {
+  id            String              @id @default(uuid())
+  user_id       String
+  name          String
+  category_id   String?
+  account_id    String?             // cuenta desde la que se paga
+  amount        Decimal             @db.Decimal(18, 4)
+  currency_code String              @db.Char(3)
+  frequency     RecurrenceFrequency
+  day_of_month  Int?                // para calcular next_due_date
+  next_due_date DateTime
+
+  auto_generate_transaction Boolean @default(false)
+  reminder_days_before      Int?    @default(3)
+  is_active                 Boolean @default(true)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  category Category?        @relation(fields: [category_id], references: [id])
+  account  FinancialAccount? @relation(fields: [account_id], references: [id])
+
+  @@map("recurring_payments")
+}
+
+// ============================================================================
+// TAXES
+// ============================================================================
+
+enum TaxType {
+  INCOME_TAX
+  MUNICIPAL
+  VAT
+  CAPITAL_GAINS
+  OTHER
+}
+
+enum TaxObligationStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+model TaxObligation {
+  id               String              @id @default(uuid())
+  user_id          String
+  type             TaxType
+  name             String              // ej. "Declaración de renta 2026"
+  fiscal_year      Int
+  due_date         DateTime
+  estimated_amount Decimal             @db.Decimal(18, 4)
+  currency_code    String              @db.Char(3)
+  obligation_status TaxObligationStatus @default(PENDING)
+  notes            String?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  payments TaxPayment[]
+
+  @@map("tax_obligations")
+}
+
+model TaxPayment {
+  id                String   @id @default(uuid())
+  tax_obligation_id String
+  date              DateTime
+  amount            Decimal  @db.Decimal(18, 4)
+  transaction_id    String?
+  notes             String?
+
+  created_at DateTime @default(now())
+
+  tax_obligation TaxObligation @relation(fields: [tax_obligation_id], references: [id], onDelete: Cascade)
+  transaction    Transaction?  @relation(fields: [transaction_id], references: [id])
+
+  @@map("tax_payments")
+}
+
+
+// ============================================================================
+// IMPORT & EXPORT + CURRENCIES
+// ============================================================================
+
+enum ImportFormat {
+  CSV
+  EXCEL
+  OFX
+  QIF
+}
+
+enum ImportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model ImportJob {
+  id              String          @id @default(uuid())
+  user_id         String
+  account_id      String          // cuenta destino de las transacciones importadas
+  source_format   ImportFormat
+  file_reference  String          // clave de almacenamiento (IStorageProvider ya existente)
+  job_status      ImportJobStatus @default(PENDING)
+  imported_count  Int             @default(0)
+  duplicate_count Int             @default(0)
+  error_count     Int             @default(0)
+  error_details   Json?
+
+  created_at   DateTime  @default(now())
+  completed_at DateTime?
+
+  @@map("import_jobs")
+}
+
+enum ExchangeRateSource {
+  MANUAL
+  API
+}
+
+model Currency {
+  code           String  @id @db.Char(3)  // ISO 4217, ej. "HNL", "USD", "EUR"
+  name           String
+  symbol         String
+  decimal_places Int     @default(2)
+
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id            String             @id @default(uuid())
+  from_currency String             @db.Char(3)
+  to_currency   String             @db.Char(3)
+  rate          Decimal            @db.Decimal(18, 8)
+  as_of_date    DateTime
+  source        ExchangeRateSource @default(MANUAL)
+
+  created_at DateTime @default(now())
+
+  @@unique([from_currency, to_currency, as_of_date])
+  @@map("exchange_rates")
+}
+
+// ============================================================================
+// AUTOMATION
+// ============================================================================
+
+enum AutomationTriggerField {
+  MERCHANT
+  DESCRIPTION
+  AMOUNT
+  ACCOUNT
+}
+
+enum AutomationOperator {
+  EQUALS
+  CONTAINS
+  GREATER_THAN
+  LESS_THAN
+}
+
+enum AutomationActionField {
+  CATEGORY
+  TAG
+}
+
+model AutomationRule {
+  id              String                 @id @default(uuid())
+  user_id         String
+  name            String
+  trigger_field   AutomationTriggerField
+  trigger_operator AutomationOperator
+  trigger_value   String
+  action_field    AutomationActionField
+  action_value    String                 // category_id o tag_id, según action_field
+  priority        Int                    @default(0)
+  is_active       Boolean                @default(true)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+
+  @@map("automation_rules")
+}
+
+// ============================================================================
+// REMINDERS & NOTIFICATIONS
+// ============================================================================
+
+enum ReminderSourceModule {
+  DEBT
+  TAX
+  RECURRING_PAYMENT
+  GOAL
+  CUSTOM
+}
+
+model Reminder {
+  id            String               @id @default(uuid())
+  user_id       String
+  title         String
+  message       String?
+  due_date      DateTime
+  source_module ReminderSourceModule
+  source_id     String?              // id de la entidad relacionada, si no es CUSTOM
+  is_dismissed  Boolean              @default(false)
+
+  created_at DateTime @default(now())
+
+  @@map("reminders")
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+  IN_APP
+}
+
+model Notification {
+  id                 String              @id @default(uuid())
+  user_id            String
+  channel            NotificationChannel
+  title              String
+  body               String
+  related_reminder_id String?
+  sent_at            DateTime?
+  read_at            DateTime?
+
+  created_at DateTime @default(now())
+
+  reminder Reminder? @relation(fields: [related_reminder_id], references: [id])
+
+  @@map("notifications")
+}
+
+// ============================================================================
+// BILLING & SUBSCRIPTIONS
+// ============================================================================
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+model Plan {
+  id               String          @id @default(uuid())
+  code             String          @unique   // ej. "FREE", "BASIC", "PREMIUM"
+  name             String
+  price_amount     Decimal         @db.Decimal(18, 4)
+  currency_code    String          @db.Char(3)
+  billing_interval BillingInterval
+  features         Json            // flags de feature-gating, ej. { "investments": true, "taxes": true }
+  is_active        Boolean         @default(true)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  STRIPE
+}
+
+model Subscription {
+  id                       String              @id @default(uuid())
+  user_id                  String              @unique   // un usuario = una suscripción (por ahora)
+  plan_id                  String
+  subscription_status      SubscriptionStatus  @default(TRIALING)
+  provider                 PaymentProvider      @default(STRIPE)
+  external_customer_id     String              // ID del cliente en el proveedor de pago
+  external_subscription_id String?             // ID de la suscripción en el proveedor de pago
+  current_period_start     DateTime?
+  current_period_end       DateTime?
+  cancel_at_period_end     Boolean             @default(false)
+  trial_ends_at            DateTime?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  user     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [plan_id], references: [id])
+  invoices Invoice[]
+
+  @@map("subscriptions")
+}
+
+enum InvoiceStatus {
+  PAID
+  FAILED
+  PENDING
+}
+
+model Invoice {
+  id                  String        @id @default(uuid())
+  subscription_id     String
+  external_invoice_id String        @unique
+  amount              Decimal       @db.Decimal(18, 4)
+  currency_code       String        @db.Char(3)
+  invoice_status      InvoiceStatus
+  paid_at             DateTime?
+
+  created_at DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model BillingWebhookEvent {
+  id           String   @id @default(uuid())
+  provider     PaymentProvider
+  external_id  String   // ID del evento en el proveedor — usado para idempotencia
+  event_type   String
+  processed_at DateTime?
+  payload      Json
+
+  created_at DateTime @default(now())
+
+  @@unique([provider, external_id])
+  @@map("billing_webhook_events")
 }

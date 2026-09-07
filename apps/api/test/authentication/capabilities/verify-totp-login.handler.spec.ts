@@ -7,7 +7,8 @@ import { VerifyTotpLoginHandler } from "@auth/capabilities/verify-totp-login/han
 import { VerifyTotpLoginCommand } from "@auth/capabilities/verify-totp-login/command"
 import { TotpService } from "@auth/integration/services/totp.service"
 import { PrismaService } from "@shared/integration/services/prisma.service"
-import { success, failure } from "@shared/business/utils/error-handling"
+import { success } from "@shared/business/utils/error-handling"
+import { jest, describe, beforeEach, afterEach, expect, it } from "@jest/globals"
 
 const VALID_USER_ID = "user-123"
 const JWT_SECRET = "test-secret"

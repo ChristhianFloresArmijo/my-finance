@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing"
+import { jest, describe, beforeEach, afterEach, expect, it } from "@jest/globals"
 import { ConflictException, NotFoundException } from "@nestjs/common"
 import { AssignRoleToUserHandler } from "@authorization/capabilities/assign-role-to-user/handler"
 import { AssignRoleToUserCommand } from "@authorization/capabilities/assign-role-to-user/command"
@@ -11,7 +12,6 @@ import {
   createMockRoleData,
   createMockUserRoleData,
 } from "../../helpers/mock-factories"
-import { Status } from "@database/prisma/generated-client"
 
 describe("AssignRoleToUserHandler", () => {
   let handler: AssignRoleToUserHandler

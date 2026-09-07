@@ -1,5 +1,6 @@
 import { IStorageProvider } from "@shared/business/storage/IStorageProvider"
 import { ConfigService } from "@nestjs/config"
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
 
 /**
  * Stores files in an AWS S3 bucket.
@@ -27,8 +28,6 @@ export class S3StorageProvider implements IStorageProvider {
 
     // Lazy-load the AWS SDK so the app starts even when the package is not installed
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { S3Client } = require("@aws-sdk/client-s3")
       this.client = new S3Client({ region })
     } catch {
       throw new Error(
@@ -38,8 +37,6 @@ export class S3StorageProvider implements IStorageProvider {
   }
 
   async save(path: string, buffer: Buffer, mimeType: string): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { PutObjectCommand } = require("@aws-sdk/client-s3")
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -52,8 +49,6 @@ export class S3StorageProvider implements IStorageProvider {
   }
 
   async delete(url: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { DeleteObjectCommand } = require("@aws-sdk/client-s3")
     // Extract the S3 key from the URL
     const key = url.replace(`${this.baseUrl}/`, "")
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
