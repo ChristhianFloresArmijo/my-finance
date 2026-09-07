@@ -64,7 +64,7 @@ model User {
   recovery_codes              UserRecoveryCode[]
   profile                     UserProfile?
   preferences                 UserPreferences?
-  financial_accounts           FinancialAccount[]
+  financial_accounts          FinancialAccount[]
   subscription                Subscription?
 
   @@map("users")
@@ -91,19 +91,20 @@ model UserProfile {
 }
 
 model UserPreferences {
-  id           String    @id @default(uuid())
-  user_id      String    @unique
-  theme        String    @default("system") // "light" | "dark" | "system"
-  language     String    @default("en")
-  timezone     String    @default("UTC")
-  notify_email Boolean   @default(true)
-  notify_push  Boolean   @default(false)
-  notify_sms   Boolean   @default(false)
-  status       Status    @default(ACTIVE)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime? @updatedAt
-  deleted_at   DateTime?
-  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id            String    @id @default(uuid())
+  user_id       String    @unique
+  theme         String    @default("system") // "light" | "dark" | "system"
+  language      String    @default("en")
+  timezone      String    @default("UTC")
+  notify_email  Boolean   @default(true)
+  notify_push   Boolean   @default(false)
+  notify_sms    Boolean   @default(false)
+  base_currency String?   @db.Char(3)
+  status        Status    @default(ACTIVE)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
+  deleted_at    DateTime?
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
 }
@@ -116,6 +117,7 @@ model UserRecoveryCode {
   created_at DateTime  @default(now())
   user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@index([user_id])
   @@map("user_recovery_codes")
 }
 
@@ -130,6 +132,7 @@ model RefreshToken {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
+  @@index([user_id])
   @@map("refresh_tokens")
 }
 
@@ -289,12 +292,13 @@ model Category {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  parent            Category?          @relation("CategoryTree", fields: [parent_id], references: [id])
-  children          Category[]         @relation("CategoryTree")
-  transactions      Transaction[]
-  budgets           Budget[]
+  parent             Category?          @relation("CategoryTree", fields: [parent_id], references: [id])
+  children           Category[]         @relation("CategoryTree")
+  transactions       Transaction[]
+  budgets            Budget[]
   recurring_payments RecurringPayment[]
 
+  @@index([user_id])
   @@map("categories")
 }
 
@@ -348,10 +352,11 @@ model Document {
   created_at DateTime  @default(now())
   deleted_at DateTime?
 
-  attachments   DocumentAttachment[]
-  transaction   Transaction?         @relation(fields: [transaction_id], references: [id])
+  attachments    DocumentAttachment[]
+  transaction    Transaction?         @relation(fields: [transaction_id], references: [id])
   transaction_id String?
 
+  @@index([user_id])
   @@map("documents")
 }
 
@@ -401,14 +406,15 @@ model Transaction {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  account           FinancialAccount   @relation(fields: [account_id], references: [id])
-  category          Category?          @relation(fields: [category_id], references: [id])
-  tags              TransactionTag[]
-  documents         Document[]
+  account            FinancialAccount   @relation(fields: [account_id], references: [id])
+  category           Category?          @relation(fields: [category_id], references: [id])
+  tags               TransactionTag[]
+  documents          Document[]
   goal_contributions GoalContribution[]
   debt_payments      DebtPayment[]
   tax_payments       TaxPayment[]
 
+  @@index([user_id])
   @@map("transactions")
 }
 
@@ -445,14 +451,15 @@ model FinancialAccount {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  transactions      Transaction[]
-  budgets           Budget[]
+  user               User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  budgets            Budget[]
   savings_goals      SavingsGoal[]
-  debts             Debt[]
-  investments       Investment[]
+  debts              Debt[]
+  investments        Investment[]
   recurring_payments RecurringPayment[]
 
+  @@index([user_id])
   @@map("financial_accounts")
 }
 
@@ -491,6 +498,7 @@ model Budget {
   account  FinancialAccount? @relation(fields: [account_id], references: [id])
   tag      Tag?              @relation(fields: [tag_id], references: [id])
 
+  @@index([user_id])
   @@map("budgets")
 }
 
@@ -521,17 +529,19 @@ model SavingsGoal {
   auto_contribution_amount    Decimal?             @db.Decimal(18, 4)
   auto_contribution_frequency RecurrenceFrequency?
 
-  icon   String?
-  color  String?
-  status GoalStatus @default(IN_PROGRESS)
+  icon            String?
+  color           String?
+  progress_status GoalStatus @default(IN_PROGRESS)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   linked_account FinancialAccount?  @relation(fields: [linked_account_id], references: [id])
   contributions  GoalContribution[]
 
+  @@index([user_id])
   @@map("savings_goals")
 }
 
@@ -544,7 +554,9 @@ model GoalContribution {
   transaction_id String? // si el aporte proviene de una Transaction real
   notes          String?
 
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   goal        SavingsGoal  @relation(fields: [goal_id], references: [id], onDelete: Cascade)
   transaction Transaction? @relation(fields: [transaction_id], references: [id])
@@ -596,15 +608,17 @@ model Debt {
   start_date           DateTime
   due_date             DateTime? // fecha de vencimiento / fin de plazo, si aplica
   minimum_payment      Decimal      @db.Decimal(18, 4)
-  debt_status          DebtStatus   @default(ACTIVE)
+  repayment_status     DebtStatus   @default(ACTIVE)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   financial_account FinancialAccount? @relation(fields: [financial_account_id], references: [id])
   payments          DebtPayment[]
 
+  @@index([user_id])
   @@map("debts")
 }
 
@@ -660,10 +674,12 @@ model Investment {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   account      FinancialAccount?       @relation(fields: [account_id], references: [id])
   transactions InvestmentTransaction[]
 
+  @@index([user_id])
   @@map("investments")
 }
 
@@ -712,7 +728,9 @@ model Asset {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
+  @@index([user_id])
   @@map("assets")
 }
 
@@ -748,15 +766,16 @@ model RecurringPayment {
 
   auto_generate_transaction Boolean @default(false)
   reminder_days_before      Int?    @default(3)
-  is_active                 Boolean @default(true)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   category Category?         @relation(fields: [category_id], references: [id])
   account  FinancialAccount? @relation(fields: [account_id], references: [id])
 
+  @@index([user_id])
   @@map("recurring_payments")
 }
 
@@ -780,23 +799,25 @@ enum TaxObligationStatus {
 }
 
 model TaxObligation {
-  id                String              @id @default(uuid())
-  user_id           String
-  type              TaxType
-  name              String // ej. "Declaración de renta 2026"
-  fiscal_year       Int
-  due_date          DateTime
-  estimated_amount  Decimal             @db.Decimal(18, 4)
-  currency_code     String              @db.Char(3)
-  obligation_status TaxObligationStatus @default(PENDING)
-  notes             String?
+  id               String              @id @default(uuid())
+  user_id          String
+  type             TaxType
+  name             String // ej. "Declaración de renta 2026"
+  fiscal_year      Int
+  due_date         DateTime
+  estimated_amount Decimal             @db.Decimal(18, 4)
+  currency_code    String              @db.Char(3)
+  payment_status   TaxObligationStatus @default(PENDING)
+  notes            String?
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   payments TaxPayment[]
 
+  @@index([user_id])
   @@map("tax_obligations")
 }
 
@@ -849,6 +870,7 @@ model ImportJob {
   created_at   DateTime  @default(now())
   completed_at DateTime?
 
+  @@index([user_id])
   @@map("import_jobs")
 }
 
@@ -913,12 +935,13 @@ model AutomationRule {
   action_field     AutomationActionField
   action_value     String // category_id o tag_id, según action_field
   priority         Int                    @default(0)
-  is_active        Boolean                @default(true)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
+  @@index([user_id])
   @@map("automation_rules")
 }
 
@@ -947,6 +970,7 @@ model Reminder {
   created_at    DateTime       @default(now())
   notifications Notification[]
 
+  @@index([user_id])
   @@map("reminders")
 }
 
@@ -970,6 +994,7 @@ model Notification {
 
   reminder Reminder? @relation(fields: [related_reminder_id], references: [id])
 
+  @@index([user_id])
   @@map("notifications")
 }
 
