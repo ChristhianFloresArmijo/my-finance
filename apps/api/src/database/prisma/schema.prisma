@@ -36,13 +36,13 @@ model User {
   id String @id @default(uuid())
 
   first_name String
-  last_name String
-  email String @unique
-  password String
+  last_name  String
+  email      String    @unique
+  password   String
   last_login DateTime?
 
-  email_verified_at        DateTime?
-  password_reset_token     String?   @unique
+  email_verified_at         DateTime?
+  password_reset_token      String?   @unique
   password_reset_expires_at DateTime?
 
   // 2FA
@@ -50,20 +50,22 @@ model User {
   totp_enabled    Boolean   @default(false)
   totp_enabled_at DateTime?
 
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
-  status Status @default(ACTIVE)
+  status     Status    @default(ACTIVE)
 
   // RELATIONS
-  refresh_tokens RefreshToken[]  // One user can have multiple refresh tokens (multiple devices/sessions)
-  user_roles UserRole[] @relation("UserRoles") // New RBAC relation
-  assigned_roles UserRole[] @relation("AssignedRoles") // Roles assigned by this user
-  direct_permissions UserPermission[] @relation("UserDirectPermissions")
-  assigned_direct_permissions UserPermission[] @relation("AssignedDirectPermissions")
-  recovery_codes UserRecoveryCode[]
-  profile     UserProfile?
-  preferences UserPreferences?
+  refresh_tokens              RefreshToken[] // One user can have multiple refresh tokens (multiple devices/sessions)
+  user_roles                  UserRole[]         @relation("UserRoles") // New RBAC relation
+  assigned_roles              UserRole[]         @relation("AssignedRoles") // Roles assigned by this user
+  direct_permissions          UserPermission[]   @relation("UserDirectPermissions")
+  assigned_direct_permissions UserPermission[]   @relation("AssignedDirectPermissions")
+  recovery_codes              UserRecoveryCode[]
+  profile                     UserProfile?
+  preferences                 UserPreferences?
+  financial_accounts           FinancialAccount[]
+  subscription                Subscription?
 
   @@map("users")
 }
@@ -78,7 +80,7 @@ model UserProfile {
   city           String?
   state          String?
   postal_code    String?
-  country        String?   // ISO 3166-1 alpha-2 e.g. "US"
+  country        String? // ISO 3166-1 alpha-2 e.g. "US"
   status         Status    @default(ACTIVE)
   created_at     DateTime  @default(now())
   updated_at     DateTime? @updatedAt
@@ -89,19 +91,19 @@ model UserProfile {
 }
 
 model UserPreferences {
-  id            String    @id @default(uuid())
-  user_id       String    @unique
-  theme         String    @default("system") // "light" | "dark" | "system"
-  language      String    @default("en")
-  timezone      String    @default("UTC")
-  notify_email  Boolean   @default(true)
-  notify_push   Boolean   @default(false)
-  notify_sms    Boolean   @default(false)
-  status        Status    @default(ACTIVE)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime? @updatedAt
-  deleted_at    DateTime?
-  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id           String    @id @default(uuid())
+  user_id      String    @unique
+  theme        String    @default("system") // "light" | "dark" | "system"
+  language     String    @default("en")
+  timezone     String    @default("UTC")
+  notify_email Boolean   @default(true)
+  notify_push  Boolean   @default(false)
+  notify_sms   Boolean   @default(false)
+  status       Status    @default(ACTIVE)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime? @updatedAt
+  deleted_at   DateTime?
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
 }
@@ -119,7 +121,7 @@ model UserRecoveryCode {
 
 model RefreshToken {
   id         String    @id @default(uuid())
-  token      String    @unique               // the actual JWT refresh token string
+  token      String    @unique // the actual JWT refresh token string
   user       User      @relation(fields: [user_id], references: [id])
   user_id    String
   expires_at DateTime
@@ -136,43 +138,43 @@ model RefreshToken {
 // ============================================================================
 
 enum PermissionScope {
-  ALL  // Applies to all records (default)
-  OWN  // Restricted to the user's own records
+  ALL // Applies to all records (default)
+  OWN // Restricted to the user's own records
   TEAM // Restricted to the user's team/group records
-  ORG  // Restricted to the user's organization records
+  ORG // Restricted to the user's organization records
 }
 
 model Role {
-  id String @id @default(uuid())
-  name String @unique // e.g., "admin", "client", "staff", "moderator"
+  id           String  @id @default(uuid())
+  name         String  @unique // e.g., "admin", "client", "staff", "moderator"
   display_name String // e.g., "Administrator", "Client User", "Staff Member"
-  description String?
-  is_system Boolean @default(false) // System roles cannot be deleted
-  
-  created_at DateTime @default(now())
+  description  String?
+  is_system    Boolean @default(false) // System roles cannot be deleted
+
+  created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  deleted_at DateTime? 
-  status Status @default(ACTIVE)
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   // RELATIONS
-  user_roles UserRole[]
+  user_roles       UserRole[]
   role_permissions RolePermission[]
 
   @@map("roles")
 }
 
 model Permission {
-  id String @id @default(uuid())
-  resource String // e.g., "user", "post", "system", "report"
-  action String // e.g., "create", "read", "update", "delete", "manage"
-  scope PermissionScope @default(ALL) // Scope of the permission — ALL | OWN | TEAM | ORG
+  id          String          @id @default(uuid())
+  resource    String // e.g., "user", "post", "system", "report"
+  action      String // e.g., "create", "read", "update", "delete", "manage"
+  scope       PermissionScope @default(ALL) // Scope of the permission — ALL | OWN | TEAM | ORG
   description String?
-  is_system Boolean @default(false) // System permissions cannot be deleted
+  is_system   Boolean         @default(false) // System permissions cannot be deleted
 
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
-  status Status @default(ACTIVE)
+  status     Status    @default(ACTIVE)
 
   // RELATIONS
   role_permissions RolePermission[]
@@ -184,21 +186,21 @@ model Permission {
 }
 
 model UserRole {
-  id String @id @default(uuid())
-  user_id String
-  role_id String
+  id          String    @id @default(uuid())
+  user_id     String
+  role_id     String
   assigned_by String? // Who assigned this role (User ID)
-  assigned_at DateTime @default(now())
-  expires_at DateTime? // Optional: time-limited roles
-  status Status @default(ACTIVE)
-  
-  created_at DateTime @default(now())
+  assigned_at DateTime  @default(now())
+  expires_at  DateTime? // Optional: time-limited roles
+  status      Status    @default(ACTIVE)
+
+  created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  deleted_at DateTime? 
+  deleted_at DateTime?
 
   // RELATIONS
-  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  user User @relation("UserRoles", fields: [user_id], references: [id], onDelete: Cascade)
+  role             Role  @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  user             User  @relation("UserRoles", fields: [user_id], references: [id], onDelete: Cascade)
   assigned_by_user User? @relation("AssignedRoles", fields: [assigned_by], references: [id], onDelete: SetNull)
 
   // A user can only have one instance of a specific role
@@ -214,15 +216,15 @@ model UserPermission {
   assigned_at   DateTime  @default(now())
   expires_at    DateTime?
 
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-  deleted_at  DateTime?
-  status      Status    @default(ACTIVE)
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   // RELATIONS
-  user                 User       @relation("UserDirectPermissions", fields: [user_id], references: [id], onDelete: Cascade)
-  permission           Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
-  assigned_by_user     User?      @relation("AssignedDirectPermissions", fields: [assigned_by], references: [id], onDelete: SetNull)
+  user             User       @relation("UserDirectPermissions", fields: [user_id], references: [id], onDelete: Cascade)
+  permission       Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  assigned_by_user User?      @relation("AssignedDirectPermissions", fields: [assigned_by], references: [id], onDelete: SetNull)
 
   @@unique([user_id, permission_id])
   @@map("user_permissions")
@@ -234,28 +236,28 @@ model UserPermission {
 
 model ChangeLog {
   id           String   @id @default(uuid())
-  action       String   // e.g., "create-role", "assign-role-to-user"
-  entity_type  String   // e.g., "Role", "Permission", "UserRole"
-  entity_id    String?  // Primary key of the affected record
-  performed_by String?  // User ID of the actor
-  payload      Json?    // Sanitized command data (no passwords)
+  action       String // e.g., "create-role", "assign-role-to-user"
+  entity_type  String // e.g., "Role", "Permission", "UserRole"
+  entity_id    String? // Primary key of the affected record
+  performed_by String? // User ID of the actor
+  payload      Json? // Sanitized command data (no passwords)
   created_at   DateTime @default(now())
 
   @@map("change_logs")
 }
 
 model RolePermission {
-  id String @id @default(uuid())
-  role_id String
+  id            String @id @default(uuid())
+  role_id       String
   permission_id String
-  
-  created_at DateTime @default(now())
+
+  created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  deleted_at DateTime? 
-  status Status @default(ACTIVE)
+  deleted_at DateTime?
+  status     Status    @default(ACTIVE)
 
   // RELATIONS
-  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
 
   // A role can only have one instance of a specific permission
@@ -274,8 +276,8 @@ enum CategoryKind {
 
 model Category {
   id        String       @id @default(uuid())
-  user_id   String?      // null = categoría del sistema (seed), no editable/borrable por el usuario
-  parent_id String?      // solo un nivel de anidación: categoría → subcategoría
+  user_id   String? // null = categoría del sistema (seed), no editable/borrable por el usuario
+  parent_id String? // solo un nivel de anidación: categoría → subcategoría
   name      String
   kind      CategoryKind
   icon      String?
@@ -287,14 +289,17 @@ model Category {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  parent   Category?  @relation("CategoryTree", fields: [parent_id], references: [id])
-  children Category[] @relation("CategoryTree")
+  parent            Category?          @relation("CategoryTree", fields: [parent_id], references: [id])
+  children          Category[]         @relation("CategoryTree")
+  transactions      Transaction[]
+  budgets           Budget[]
+  recurring_payments RecurringPayment[]
 
   @@map("categories")
 }
 
 model Tag {
-  id      String @id @default(uuid())
+  id      String  @id @default(uuid())
   user_id String
   name    String
   color   String?
@@ -305,6 +310,7 @@ model Tag {
   status     Status    @default(ACTIVE)
 
   transaction_tags TransactionTag[]
+  budgets          Budget[]
 
   @@unique([user_id, name])
   @@map("tags")
@@ -333,16 +339,18 @@ enum DocumentEntityType {
 }
 
 model Document {
-  id             String   @id @default(uuid())
+  id             String @id @default(uuid())
   user_id        String
-  file_reference String   // clave de almacenamiento — reutiliza IStorageProvider ya existente
+  file_reference String // clave de almacenamiento — reutiliza IStorageProvider ya existente
   file_name      String
   mime_type      String
 
   created_at DateTime  @default(now())
   deleted_at DateTime?
 
-  attachments DocumentAttachment[]
+  attachments   DocumentAttachment[]
+  transaction   Transaction?         @relation(fields: [transaction_id], references: [id])
+  transaction_id String?
 
   @@map("documents")
 }
@@ -358,7 +366,6 @@ model DocumentAttachment {
   @@map("document_attachments")
 }
 
-
 // ============================================================================
 // TRANSACTIONS
 // ============================================================================
@@ -371,33 +378,36 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          String          @id @default(uuid())
-  user_id     String
-  account_id  String
-  category_id String?
-  type        TransactionType
-  amount      Decimal         @db.Decimal(18, 4)   // siempre positivo — ver regla de negocio
-  currency_code String        @db.Char(3)
-  description String?
-  merchant    String?
-  date        DateTime
-  location    String?
-  notes       String?
+  id            String          @id @default(uuid())
+  user_id       String
+  account_id    String
+  category_id   String?
+  type          TransactionType
+  amount        Decimal         @db.Decimal(18, 4) // siempre positivo — ver regla de negocio
+  currency_code String          @db.Char(3)
+  description   String?
+  merchant      String?
+  date          DateTime
+  location      String?
+  notes         String?
 
   // Solo para type = TRANSFER
-  transfer_account_id String?   // cuenta destino
-  transfer_group_id   String?   // agrupa las dos filas (origen/destino) de una misma transferencia
-  exchange_rate       Decimal?  @db.Decimal(18, 8)  // si origen y destino tienen distinta moneda
+  transfer_account_id String? // cuenta destino
+  transfer_group_id   String? // agrupa las dos filas (origen/destino) de una misma transferencia
+  exchange_rate       Decimal? @db.Decimal(18, 8) // si origen y destino tienen distinta moneda
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  account  FinancialAccount @relation(fields: [account_id], references: [id])
-  category Category?        @relation(fields: [category_id], references: [id])
-  tags     TransactionTag[]
-  documents Document[]
+  account           FinancialAccount   @relation(fields: [account_id], references: [id])
+  category          Category?          @relation(fields: [category_id], references: [id])
+  tags              TransactionTag[]
+  documents         Document[]
+  goal_contributions GoalContribution[]
+  debt_payments      DebtPayment[]
+  tax_payments       TaxPayment[]
 
   @@map("transactions")
 }
@@ -422,10 +432,10 @@ model FinancialAccount {
   name          String
   type          AccountType
   institution   String?
-  currency_code String      @db.Char(3)   // ISO 4217
-  balance       Decimal     @db.Decimal(18, 4) @default(0)  // ver "Balance" abajo
-  credit_limit  Decimal?    @db.Decimal(18, 4)              // solo CREDIT_CARD
-  statement_day Int?                                         // día de corte, solo CREDIT_CARD
+  currency_code String      @db.Char(3) // ISO 4217
+  balance       Decimal     @default(0) @db.Decimal(18, 4) // ver "Balance" abajo
+  credit_limit  Decimal?    @db.Decimal(18, 4) // solo CREDIT_CARD
+  statement_day Int? // día de corte, solo CREDIT_CARD
   color         String?
   icon          String?
   is_archived   Boolean     @default(false)
@@ -435,8 +445,13 @@ model FinancialAccount {
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  budgets           Budget[]
+  savings_goals      SavingsGoal[]
+  debts             Debt[]
+  investments       Investment[]
+  recurring_payments RecurringPayment[]
 
   @@map("financial_accounts")
 }
@@ -453,9 +468,9 @@ enum BudgetPeriod {
 }
 
 model Budget {
-  id       String       @id @default(uuid())
-  user_id  String
-  name     String?
+  id      String  @id @default(uuid())
+  user_id String
+  name    String?
 
   // Exactamente uno de los tres debe estar presente (validado en el entity factory)
   category_id String?
@@ -465,14 +480,14 @@ model Budget {
   period        BudgetPeriod
   amount        Decimal      @db.Decimal(18, 4)
   currency_code String       @db.Char(3)
-  start_date    DateTime      // ancla para calcular el periodo vigente
+  start_date    DateTime // ancla para calcular el periodo vigente
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
   status     Status    @default(ACTIVE)
 
-  category Category?        @relation(fields: [category_id], references: [id])
+  category Category?         @relation(fields: [category_id], references: [id])
   account  FinancialAccount? @relation(fields: [account_id], references: [id])
   tag      Tag?              @relation(fields: [tag_id], references: [id])
 
@@ -495,13 +510,13 @@ enum ContributionSource {
 }
 
 model SavingsGoal {
-  id              String       @id @default(uuid())
-  user_id         String
-  name            String
-  target_amount   Decimal      @db.Decimal(18, 4)
-  currency_code   String       @db.Char(3)
-  target_date     DateTime?
-  linked_account_id String?    // cuenta donde físicamente se guarda el ahorro (opcional)
+  id                String    @id @default(uuid())
+  user_id           String
+  name              String
+  target_amount     Decimal   @db.Decimal(18, 4)
+  currency_code     String    @db.Char(3)
+  target_date       DateTime?
+  linked_account_id String? // cuenta donde físicamente se guarda el ahorro (opcional)
 
   auto_contribution_amount    Decimal?             @db.Decimal(18, 4)
   auto_contribution_frequency RecurrenceFrequency?
@@ -514,19 +529,19 @@ model SavingsGoal {
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
 
-  linked_account FinancialAccount?   @relation(fields: [linked_account_id], references: [id])
+  linked_account FinancialAccount?  @relation(fields: [linked_account_id], references: [id])
   contributions  GoalContribution[]
 
   @@map("savings_goals")
 }
 
 model GoalContribution {
-  id             String              @id @default(uuid())
+  id             String             @id @default(uuid())
   goal_id        String
-  amount         Decimal             @db.Decimal(18, 4)
+  amount         Decimal            @db.Decimal(18, 4)
   date           DateTime
-  source         ContributionSource  @default(MANUAL)
-  transaction_id String?             // si el aporte proviene de una Transaction real
+  source         ContributionSource @default(MANUAL)
+  transaction_id String? // si el aporte proviene de una Transaction real
   notes          String?
 
   created_at DateTime @default(now())
@@ -536,7 +551,6 @@ model GoalContribution {
 
   @@map("goal_contributions")
 }
-
 
 // ============================================================================
 // DEBTS
@@ -568,21 +582,21 @@ enum DebtPaymentType {
 }
 
 model Debt {
-  id                  String       @id @default(uuid())
-  user_id             String
-  financial_account_id String?    // opcional — ver 01-cuentas.md, decisión abierta
-  name                String
-  creditor            String
-  type                DebtType
-  interest_type       InterestType
-  interest_rate       Decimal      @db.Decimal(9, 6)  // tasa anual, %
-  initial_balance     Decimal      @db.Decimal(18, 4)
-  current_balance     Decimal      @db.Decimal(18, 4)
-  currency_code       String       @db.Char(3)
-  start_date          DateTime
-  due_date            DateTime?    // fecha de vencimiento / fin de plazo, si aplica
-  minimum_payment     Decimal      @db.Decimal(18, 4)
-  debt_status         DebtStatus   @default(ACTIVE)
+  id                   String       @id @default(uuid())
+  user_id              String
+  financial_account_id String? // opcional — ver 01-cuentas.md, decisión abierta
+  name                 String
+  creditor             String
+  type                 DebtType
+  interest_type        InterestType
+  interest_rate        Decimal      @db.Decimal(9, 6) // tasa anual, %
+  initial_balance      Decimal      @db.Decimal(18, 4)
+  current_balance      Decimal      @db.Decimal(18, 4)
+  currency_code        String       @db.Char(3)
+  start_date           DateTime
+  due_date             DateTime? // fecha de vencimiento / fin de plazo, si aplica
+  minimum_payment      Decimal      @db.Decimal(18, 4)
+  debt_status          DebtStatus   @default(ACTIVE)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -602,7 +616,7 @@ model DebtPayment {
   principal_amount Decimal         @db.Decimal(18, 4)
   interest_amount  Decimal         @db.Decimal(18, 4)
   payment_type     DebtPaymentType
-  transaction_id   String?         // si se pagó desde una cuenta rastreada
+  transaction_id   String? // si se pagó desde una cuenta rastreada
   notes            String?
 
   created_at DateTime @default(now())
@@ -633,14 +647,14 @@ enum InvestmentTxType {
 }
 
 model Investment {
-  id            String         @id @default(uuid())
-  user_id       String
-  account_id    String?        // FinancialAccount de tipo INVESTMENT, opcional
-  type          InvestmentType
-  symbol        String?        // ticker, si aplica (acciones/ETF/cripto)
-  name          String
-  currency_code String         @db.Char(3)
-  current_price Decimal?       @db.Decimal(18, 8)   // actualización manual en MVP — ver decisiones
+  id                       String         @id @default(uuid())
+  user_id                  String
+  account_id               String? // FinancialAccount de tipo INVESTMENT, opcional
+  type                     InvestmentType
+  symbol                   String? // ticker, si aplica (acciones/ETF/cripto)
+  name                     String
+  currency_code            String         @db.Char(3)
+  current_price            Decimal?       @db.Decimal(18, 8) // actualización manual en MVP — ver decisiones
   current_price_updated_at DateTime?
 
   created_at DateTime  @default(now())
@@ -657,9 +671,9 @@ model InvestmentTransaction {
   id             String           @id @default(uuid())
   investment_id  String
   type           InvestmentTxType
-  quantity       Decimal?         @db.Decimal(28, 8)  // null para DIVIDEND
-  price_per_unit Decimal?         @db.Decimal(18, 8)  // null para DIVIDEND
-  amount         Decimal          @db.Decimal(18, 4)  // total, incluye DIVIDEND
+  quantity       Decimal?         @db.Decimal(28, 8) // null para DIVIDEND
+  price_per_unit Decimal?         @db.Decimal(18, 8) // null para DIVIDEND
+  amount         Decimal          @db.Decimal(18, 4) // total, incluye DIVIDEND
   fees           Decimal?         @db.Decimal(18, 4)
   date           DateTime
   notes          String?
@@ -692,7 +706,7 @@ model Asset {
   purchase_value    Decimal   @db.Decimal(18, 4)
   current_value     Decimal   @db.Decimal(18, 4)
   purchase_date     DateTime
-  depreciation_rate Decimal?  @db.Decimal(9, 6)   // % anual, opcional
+  depreciation_rate Decimal?  @db.Decimal(9, 6) // % anual, opcional
   currency_code     String    @db.Char(3)
 
   created_at DateTime  @default(now())
@@ -725,11 +739,11 @@ model RecurringPayment {
   user_id       String
   name          String
   category_id   String?
-  account_id    String?             // cuenta desde la que se paga
+  account_id    String? // cuenta desde la que se paga
   amount        Decimal             @db.Decimal(18, 4)
   currency_code String              @db.Char(3)
   frequency     RecurrenceFrequency
-  day_of_month  Int?                // para calcular next_due_date
+  day_of_month  Int? // para calcular next_due_date
   next_due_date DateTime
 
   auto_generate_transaction Boolean @default(false)
@@ -740,7 +754,7 @@ model RecurringPayment {
   updated_at DateTime? @updatedAt
   deleted_at DateTime?
 
-  category Category?        @relation(fields: [category_id], references: [id])
+  category Category?         @relation(fields: [category_id], references: [id])
   account  FinancialAccount? @relation(fields: [account_id], references: [id])
 
   @@map("recurring_payments")
@@ -766,16 +780,16 @@ enum TaxObligationStatus {
 }
 
 model TaxObligation {
-  id               String              @id @default(uuid())
-  user_id          String
-  type             TaxType
-  name             String              // ej. "Declaración de renta 2026"
-  fiscal_year      Int
-  due_date         DateTime
-  estimated_amount Decimal             @db.Decimal(18, 4)
-  currency_code    String              @db.Char(3)
+  id                String              @id @default(uuid())
+  user_id           String
+  type              TaxType
+  name              String // ej. "Declaración de renta 2026"
+  fiscal_year       Int
+  due_date          DateTime
+  estimated_amount  Decimal             @db.Decimal(18, 4)
+  currency_code     String              @db.Char(3)
   obligation_status TaxObligationStatus @default(PENDING)
-  notes            String?
+  notes             String?
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -802,7 +816,6 @@ model TaxPayment {
   @@map("tax_payments")
 }
 
-
 // ============================================================================
 // IMPORT & EXPORT + CURRENCIES
 // ============================================================================
@@ -824,9 +837,9 @@ enum ImportJobStatus {
 model ImportJob {
   id              String          @id @default(uuid())
   user_id         String
-  account_id      String          // cuenta destino de las transacciones importadas
+  account_id      String // cuenta destino de las transacciones importadas
   source_format   ImportFormat
-  file_reference  String          // clave de almacenamiento (IStorageProvider ya existente)
+  file_reference  String // clave de almacenamiento (IStorageProvider ya existente)
   job_status      ImportJobStatus @default(PENDING)
   imported_count  Int             @default(0)
   duplicate_count Int             @default(0)
@@ -845,10 +858,10 @@ enum ExchangeRateSource {
 }
 
 model Currency {
-  code           String  @id @db.Char(3)  // ISO 4217, ej. "HNL", "USD", "EUR"
+  code           String @id @db.Char(3) // ISO 4217, ej. "HNL", "USD", "EUR"
   name           String
   symbol         String
-  decimal_places Int     @default(2)
+  decimal_places Int    @default(2)
 
   @@map("currencies")
 }
@@ -891,16 +904,16 @@ enum AutomationActionField {
 }
 
 model AutomationRule {
-  id              String                 @id @default(uuid())
-  user_id         String
-  name            String
-  trigger_field   AutomationTriggerField
+  id               String                 @id @default(uuid())
+  user_id          String
+  name             String
+  trigger_field    AutomationTriggerField
   trigger_operator AutomationOperator
-  trigger_value   String
-  action_field    AutomationActionField
-  action_value    String                 // category_id o tag_id, según action_field
-  priority        Int                    @default(0)
-  is_active       Boolean                @default(true)
+  trigger_value    String
+  action_field     AutomationActionField
+  action_value     String // category_id o tag_id, según action_field
+  priority         Int                    @default(0)
+  is_active        Boolean                @default(true)
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -928,10 +941,11 @@ model Reminder {
   message       String?
   due_date      DateTime
   source_module ReminderSourceModule
-  source_id     String?              // id de la entidad relacionada, si no es CUSTOM
+  source_id     String? // id de la entidad relacionada, si no es CUSTOM
   is_dismissed  Boolean              @default(false)
 
-  created_at DateTime @default(now())
+  created_at    DateTime       @default(now())
+  notifications Notification[]
 
   @@map("reminders")
 }
@@ -943,14 +957,14 @@ enum NotificationChannel {
 }
 
 model Notification {
-  id                 String              @id @default(uuid())
-  user_id            String
-  channel            NotificationChannel
-  title              String
-  body               String
+  id                  String              @id @default(uuid())
+  user_id             String
+  channel             NotificationChannel
+  title               String
+  body                String
   related_reminder_id String?
-  sent_at            DateTime?
-  read_at            DateTime?
+  sent_at             DateTime?
+  read_at             DateTime?
 
   created_at DateTime @default(now())
 
@@ -970,12 +984,12 @@ enum BillingInterval {
 
 model Plan {
   id               String          @id @default(uuid())
-  code             String          @unique   // ej. "FREE", "BASIC", "PREMIUM"
+  code             String          @unique // ej. "FREE", "BASIC", "PREMIUM"
   name             String
   price_amount     Decimal         @db.Decimal(18, 4)
   currency_code    String          @db.Char(3)
   billing_interval BillingInterval
-  features         Json            // flags de feature-gating, ej. { "investments": true, "taxes": true }
+  features         Json // flags de feature-gating, ej. { "investments": true, "taxes": true }
   is_active        Boolean         @default(true)
 
   created_at DateTime  @default(now())
@@ -999,16 +1013,16 @@ enum PaymentProvider {
 }
 
 model Subscription {
-  id                       String              @id @default(uuid())
-  user_id                  String              @unique   // un usuario = una suscripción (por ahora)
+  id                       String             @id @default(uuid())
+  user_id                  String             @unique // un usuario = una suscripción (por ahora)
   plan_id                  String
-  subscription_status      SubscriptionStatus  @default(TRIALING)
-  provider                 PaymentProvider      @default(STRIPE)
-  external_customer_id     String              // ID del cliente en el proveedor de pago
-  external_subscription_id String?             // ID de la suscripción en el proveedor de pago
+  subscription_status      SubscriptionStatus @default(TRIALING)
+  provider                 PaymentProvider    @default(STRIPE)
+  external_customer_id     String // ID del cliente en el proveedor de pago
+  external_subscription_id String? // ID de la suscripción en el proveedor de pago
   current_period_start     DateTime?
   current_period_end       DateTime?
-  cancel_at_period_end     Boolean             @default(false)
+  cancel_at_period_end     Boolean            @default(false)
   trial_ends_at            DateTime?
 
   created_at DateTime  @default(now())
@@ -1044,9 +1058,9 @@ model Invoice {
 }
 
 model BillingWebhookEvent {
-  id           String   @id @default(uuid())
+  id           String          @id @default(uuid())
   provider     PaymentProvider
-  external_id  String   // ID del evento en el proveedor — usado para idempotencia
+  external_id  String // ID del evento en el proveedor — usado para idempotencia
   event_type   String
   processed_at DateTime?
   payload      Json
